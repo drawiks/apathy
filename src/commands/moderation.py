@@ -90,8 +90,6 @@ class Moderation(commands.Cog):
 async def setup(bot):
     await bot.add_cog(Moderation(bot))
 
-
-# Moderation commands (will be added when cog is loaded)
 @commands.Cog.listener()
 async def on_ready(self):
     pass

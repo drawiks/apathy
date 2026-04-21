@@ -48,9 +48,8 @@ ROLE_POSITIONS = {
 }
 
 
-# Slash commands - defined after bot is created
 @bot.tree.command(name="ping", description="Проверить задержку бота")
-async def ping_slash(interaction: discord.Interaction):
+async def ping(interaction: discord.Interaction):
     latency = round(bot.latency * 1000)
     embed = discord.Embed(
         title="Pong!",
@@ -107,23 +106,8 @@ async def salam(interaction: discord.Interaction):
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
-@bot.tree.command(name="привет", description="Дебаг: показать приветственное сообщение")
-async def privet(interaction: discord.Interaction):
-    role = interaction.guild.get_role(BASE_ROLE)
-    role_channel = interaction.guild.get_channel(ROLE_CHANNEL)
-
-    embed = discord.Embed(
-        title=f"салам {interaction.user.name}",
-        description=f"ты пока опущенный выбери роль в {role_channel.mention}\nты получил роль {role.mention}",
-        color=EMBED_COLOR
-    )
-    embed.set_thumbnail(url=interaction.user.display_avatar.url)
-    embed.set_footer(text=f"ID: {interaction.user.id}")
-    await interaction.response.send_message(embed=embed, ephemeral=True)
-
-
 @bot.tree.command(name="kick", description="Кикнуть участника")
-async def kick_slash(interaction: discord.Interaction, member: discord.Member, *, reason: str = "Не указана"):
+async def kick(interaction: discord.Interaction, member: discord.Member, *, reason: str = "Не указана"):
     if not is_moderator(interaction.user):
         await interaction.response.send_message("У вас нет прав!", ephemeral=True)
         return
@@ -148,7 +132,7 @@ async def kick_slash(interaction: discord.Interaction, member: discord.Member, *
 
 
 @bot.tree.command(name="ban", description="Забанить участника")
-async def ban_slash(interaction: discord.Interaction, member: discord.Member, *, reason: str = "Не указана"):
+async def ban(interaction: discord.Interaction, member: discord.Member, *, reason: str = "Не указана"):
     if not is_moderator(interaction.user):
         await interaction.response.send_message("У вас нет прав!", ephemeral=True)
         return
@@ -173,7 +157,7 @@ async def ban_slash(interaction: discord.Interaction, member: discord.Member, *,
 
 
 @bot.tree.command(name="unban", description="Разбанить участника")
-async def unban_slash(interaction: discord.Interaction, user: discord.User, *, reason: str = "Не указана"):
+async def unban(interaction: discord.Interaction, user: discord.User, *, reason: str = "Не указана"):
     if not is_moderator(interaction.user):
         await interaction.response.send_message("У вас нет прав!", ephemeral=True)
         return
@@ -194,7 +178,7 @@ async def unban_slash(interaction: discord.Interaction, user: discord.User, *, r
 
 
 @bot.tree.command(name="mute", description="Замутить участника")
-async def mute_slash(interaction: discord.Interaction, member: discord.Member, duration: int = 60, *, reason: str = "Не указана"):
+async def mute(interaction: discord.Interaction, member: discord.Member, duration: int = 60, *, reason: str = "Не указана"):
     if not is_moderator(interaction.user):
         await interaction.response.send_message("У вас нет прав!", ephemeral=True)
         return
@@ -221,7 +205,7 @@ async def mute_slash(interaction: discord.Interaction, member: discord.Member, d
 
 
 @bot.tree.command(name="unmute", description="Размутить участника")
-async def unmute_slash(interaction: discord.Interaction, member: discord.Member):
+async def unmute(interaction: discord.Interaction, member: discord.Member):
     if not is_moderator(interaction.user):
         await interaction.response.send_message("У вас нет прав!", ephemeral=True)
         return
@@ -242,7 +226,7 @@ async def unmute_slash(interaction: discord.Interaction, member: discord.Member)
 
 
 @bot.tree.command(name="clear", description="Очистить сообщения")
-async def clear_slash(interaction: discord.Interaction, amount: int):
+async def clear(interaction: discord.Interaction, amount: int):
     if not is_moderator(interaction.user):
         await interaction.response.send_message("У вас нет прав!", ephemeral=True)
         return
@@ -270,7 +254,7 @@ async def clear_slash(interaction: discord.Interaction, amount: int):
 
 
 @bot.tree.command(name="warn", description="Выдать предупреждение")
-async def warn_slash(interaction: discord.Interaction, member: discord.Member, *, reason: str):
+async def warn(interaction: discord.Interaction, member: discord.Member, *, reason: str):
     if not is_moderator(interaction.user):
         await interaction.response.send_message("У вас нет прав!", ephemeral=True)
         return
@@ -292,7 +276,7 @@ async def warn_slash(interaction: discord.Interaction, member: discord.Member, *
 
 
 @bot.tree.command(name="warnings", description="Показать предупреждения")
-async def warnings_slash(interaction: discord.Interaction, member: discord.Member):
+async def warnings(interaction: discord.Interaction, member: discord.Member):
     if not is_moderator(interaction.user):
         await interaction.response.send_message("У вас нет прав!", ephemeral=True)
         return
@@ -319,7 +303,7 @@ async def warnings_slash(interaction: discord.Interaction, member: discord.Membe
 
 
 @bot.tree.command(name="unwarn", description="Снять все предупреждения")
-async def unwarn_slash(interaction: discord.Interaction, member: discord.Member):
+async def unwarn(interaction: discord.Interaction, member: discord.Member):
     if not is_moderator(interaction.user):
         await interaction.response.send_message("У вас нет прав!", ephemeral=True)
         return
@@ -335,7 +319,7 @@ async def unwarn_slash(interaction: discord.Interaction, member: discord.Member)
 
 
 @bot.tree.command(name="roles", description="Отправить сообщение для выбора ролей")
-async def roles_slash(interaction: discord.Interaction):
+async def roles(interaction: discord.Interaction):
     if not is_moderator(interaction.user):
         await interaction.response.send_message("У вас нет прав!", ephemeral=True)
         return
