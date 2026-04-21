@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import os
 import sys
 from datetime import timedelta
 from pathlib import Path
@@ -11,11 +10,12 @@ from discord.ext import commands
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import config
-from config import EMBED_COLOR, BASE_ROLE, ROLE_CHANNEL, MODERATOR_ROLES
+from config import EMBED_COLOR
 from utils.checks import is_moderator
 from utils.database import add_warning, get_warnings, remove_warnings
 
 TOKEN = config.TOKEN
+role_messages = {}
 
 logging.basicConfig(
     level=logging.INFO,
@@ -335,6 +335,8 @@ async def roles(interaction: discord.Interaction):
 
     for emoji in ROLE_POSITIONS.keys():
         await msg.add_reaction(emoji)
+
+    role_messages[interaction.guild.id] = {msg.id: ROLE_POSITIONS}
 
 
 @bot.event

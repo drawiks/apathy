@@ -1,19 +1,7 @@
-import asyncio
-from datetime import timedelta
 import discord
 from discord.ext import commands
 
-from config import EMBED_COLOR, BASE_ROLE, ROLE_CHANNEL, MODERATOR_ROLES
-from utils.checks import is_moderator
-from utils.database import add_warning, get_warnings, remove_warnings
-
-ROLE_POSITIONS = {
-    "1️⃣": 1424326184585531543,
-    "2️⃣": 1424326316945309696,
-    "3️⃣": 1424326347676975206,
-    "4️⃣": 1424326409970516070,
-    "5️⃣": 1424326450651336714,
-}
+from config import EMBED_COLOR
 
 role_messages = {}
 
@@ -89,7 +77,3 @@ class Moderation(commands.Cog):
 
 async def setup(bot):
     await bot.add_cog(Moderation(bot))
-
-@commands.Cog.listener()
-async def on_ready(self):
-    pass

@@ -1,6 +1,4 @@
 import os
-from pathlib import Path
-import discord
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -8,8 +6,6 @@ load_dotenv()
 TOKEN = os.getenv("BOT_TOKEN")
 
 WELCOME_CHANNEL = 1496221843022024936
-MAIN_CHAT = 1424317102063353979
-FLOOD_CHAT = 1424317102063353980
 BASE_ROLE = 1496222857309720720
 
 SPAM_LIMIT = 5
@@ -22,5 +18,3 @@ EMBED_COLOR = 0xffe26c
 WELCOME_IMAGE = "welcome.png"
 
 ROLE_CHANNEL = 1496238253278363668
-
-SERVER_ID = 1424317100566253600
