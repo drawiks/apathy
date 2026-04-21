@@ -330,7 +330,8 @@ async def roles(interaction: discord.Interaction):
         color=EMBED_COLOR
     )
 
-    msg = await interaction.response.send_message(embed=embed)
+    await interaction.response.send_message(embed=embed)
+    msg = await interaction.original_response()
 
     for emoji in ROLE_POSITIONS.keys():
         await msg.add_reaction(emoji)
