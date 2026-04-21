@@ -15,7 +15,6 @@ from utils.checks import is_moderator
 from utils.database import add_warning, get_warnings, remove_warnings
 
 TOKEN = config.TOKEN
-role_messages = {}
 
 logging.basicConfig(
     level=logging.INFO,
@@ -336,13 +335,14 @@ async def roles(interaction: discord.Interaction):
     for emoji in ROLE_POSITIONS.keys():
         await msg.add_reaction(emoji)
 
-    role_messages[interaction.guild.id] = {msg.id: ROLE_POSITIONS}
+    bot.role_messages[interaction.guild.id] = {msg.id: ROLE_POSITIONS}
 
 
 @bot.event
 async def on_ready():
     logger.info(f"Bot started: {bot.user} (ID: {bot.user.id})")
 
+    bot.role_messages = {}
     await bot.load_extension("cogs.welcome")
     await bot.load_extension("commands.moderation")
 

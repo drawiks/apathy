@@ -1,10 +1,6 @@
 import discord
 from discord.ext import commands
 
-from config import EMBED_COLOR
-
-role_messages = {}
-
 
 class Moderation(commands.Cog):
     def __init__(self, bot):
@@ -15,19 +11,22 @@ class Moderation(commands.Cog):
         if payload.guild_id is None:
             return
 
+        if not hasattr(self.bot, 'role_messages'):
+            return
+
         guild = self.bot.get_guild(payload.guild_id)
         if guild is None:
             return
 
-        if payload.guild_id not in role_messages:
+        if payload.guild_id not in self.bot.role_messages:
             return
 
         message_id = payload.message_id
-        if message_id not in role_messages[payload.guild_id]:
+        if message_id not in self.bot.role_messages[payload.guild_id]:
             return
 
         emoji = str(payload.emoji)
-        role_id = role_messages[payload.guild_id].get(message_id, {}).get(emoji)
+        role_id = self.bot.role_messages[payload.guild_id].get(message_id, {}).get(emoji)
         if role_id is None:
             return
 
@@ -47,19 +46,22 @@ class Moderation(commands.Cog):
         if payload.guild_id is None:
             return
 
+        if not hasattr(self.bot, 'role_messages'):
+            return
+
         guild = self.bot.get_guild(payload.guild_id)
         if guild is None:
             return
 
-        if payload.guild_id not in role_messages:
+        if payload.guild_id not in self.bot.role_messages:
             return
 
         message_id = payload.message_id
-        if message_id not in role_messages[payload.guild_id]:
+        if message_id not in self.bot.role_messages[payload.guild_id]:
             return
 
         emoji = str(payload.emoji)
-        role_id = role_messages[payload.guild_id].get(message_id, {}).get(emoji)
+        role_id = self.bot.role_messages[payload.guild_id].get(message_id, {}).get(emoji)
         if role_id is None:
             return
 
