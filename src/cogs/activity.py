@@ -34,9 +34,10 @@ class Activity(commands.Cog):
             timestamp = datetime.now().strftime("%H:%M")
             gif_path = self._get_gif_path("join")
             file = discord.File(gif_path)
+            member_color = after.colour if after.colour != discord.Colour.default() else EMBED_COLOR
             embed = discord.Embed(
                 title=f"{after.name} запустил доту",
-                color=EMBED_COLOR
+                color=member_color
             )
             embed.set_image(url=f"attachment://{gif_path}")
             embed.set_footer(text=f"время: {timestamp}")
@@ -46,9 +47,10 @@ class Activity(commands.Cog):
             timestamp = datetime.now().strftime("%H:%M")
             gif_path = self._get_gif_path("leave")
             file = discord.File(gif_path)
+            member_color = after.colour if after.colour != discord.Colour.default() else EMBED_COLOR
             embed = discord.Embed(
                 title=f"{after.name} вышел из доты",
-                color=EMBED_COLOR
+                color=member_color
             )
             embed.set_image(url=f"attachment://{gif_path}")
             embed.set_footer(text=f"время: {timestamp}")
