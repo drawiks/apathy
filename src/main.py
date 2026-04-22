@@ -235,6 +235,8 @@ async def clear(interaction: discord.Interaction, amount: int):
         await interaction.response.send_message("Количество должно быть от 1 до 1000!", ephemeral=True)
         return
 
+    await interaction.response.defer(ephemeral=True)
+
     deleted = 0
     while amount > 0:
         batch = min(amount, 100)
@@ -250,7 +252,7 @@ async def clear(interaction: discord.Interaction, amount: int):
         color=EMBED_COLOR
     )
     embed.set_footer(text=f"Модератор: {interaction.user}")
-    await interaction.response.send_message(embed=embed, ephemeral=True)
+    await interaction.followup.send(embed=embed, ephemeral=True)
 
 
 @bot.tree.command(name="warn", description="Выдать предупреждение")

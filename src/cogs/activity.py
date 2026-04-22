@@ -1,4 +1,5 @@
 from datetime import datetime
+import os
 import discord
 from discord.ext import commands
 
@@ -10,16 +11,20 @@ class Activity(commands.Cog):
         self.bot = bot
 
     def _create_embed(self, user, action: str, timestamp: str):
-        gif_url = DOTA_JOIN_GIF if action == "join" else DOTA_LEAVE_GIF
         title = f"{user.name} запустил доту" if action == "join" else f"{user.name} вышел из доты"
 
         embed = discord.Embed(
             title=title,
             color=EMBED_COLOR
         )
-        embed.set_image(url=gif_url)
         embed.set_footer(text=f"время: {timestamp}")
         return embed
+
+    def _get_gif_file(self, action: str):
+        gif_path = DOTA_JOIN_GIF if action == "join" else DOTA_LEAVE_GIF
+        if os.path.exists(gif_path):
+            return discord.File(gif_path)
+        return None
 
     @commands.Cog.listener()
     async def on_presence_update(self, before, after):
@@ -42,12 +47,20 @@ class Activity(commands.Cog):
         if after_dota and not before_dota:
             timestamp = datetime.now().strftime("%H:%M")
             embed = self._create_embed(after, "join", timestamp)
-            await channel.send(embed=embed)
+            file = self._get_gif_file("join")
+            if file:
+                await channel.send(embed=embed, file=file)
+            else:
+                await channel.send(embed=embed)
 
         elif before_dota and not after_dota:
             timestamp = datetime.now().strftime("%H:%M")
             embed = self._create_embed(after, "leave", timestamp)
-            await channel.send(embed=embed)
+            file = self._get_gif_file("leave")
+            if file:
+                await channel.send(embed=embed, file=file)
+            else:
+                await channel.send(embed=embed)
 
 
 async def setup(bot):
