@@ -31,6 +31,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 intents.reactions = True
+intents.presences = True
 
 bot = commands.Bot(
     command_prefix="!",
@@ -335,7 +336,9 @@ async def roles(interaction: discord.Interaction):
     for emoji in ROLE_POSITIONS.keys():
         await msg.add_reaction(emoji)
 
-    bot.role_messages[interaction.guild.id] = {msg.id: ROLE_POSITIONS}
+    if interaction.guild.id not in bot.role_messages:
+        bot.role_messages[interaction.guild.id] = {}
+    bot.role_messages[interaction.guild.id][msg.id] = ROLE_POSITIONS
 
 
 @bot.event
@@ -345,6 +348,7 @@ async def on_ready():
     bot.role_messages = {}
     await bot.load_extension("cogs.welcome")
     await bot.load_extension("commands.moderation")
+    await bot.load_extension("cogs.activity")
 
     try:
         synced = await bot.tree.sync()
@@ -353,17 +357,6 @@ async def on_ready():
         logger.error(f"Failed to sync: {e}")
 
     logger.info("Extensions loaded")
-
-
-@bot.event
-async def on_command_error(ctx, error):
-    if isinstance(error, commands.CommandNotFound):
-        return
-    if isinstance(error, commands.CheckFailure):
-        await ctx.send("У вас нет прав для этой команды!")
-        return
-    logger.error(f"Command error: {error}")
-    await ctx.send(f"Ошибка: {error}")
 
 
 def main():

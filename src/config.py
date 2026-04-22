@@ -18,3 +18,8 @@ EMBED_COLOR = 0xffe26c
 WELCOME_IMAGE = "welcome.png"
 
 ROLE_CHANNEL = 1496238253278363668
+
+GAME_CHANNEL = 1496591080123142195
+GAME_NAME = "Dota 2"
+DOTA_JOIN_GIF = "https://tenor.com/view/папич-arthas-papich-gif-21121089"
+DOTA_LEAVE_GIF = "https://tenor.com/view/папич-телефон-монитор-мем-gif-15162889581703995365"

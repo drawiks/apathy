@@ -2,6 +2,8 @@ from config import MODERATOR_ROLES
 
 
 def is_moderator(user):
+    if not hasattr(user, 'guild') or user.guild is None:
+        return False
     if user.guild_permissions.administrator:
         return True
     for role in user.roles:

@@ -1,3 +1,4 @@
+import logging
 import os
 from datetime import timedelta
 import discord
@@ -5,11 +6,12 @@ from discord.ext import commands
 
 from config import WELCOME_CHANNEL, ROLE_CHANNEL, BASE_ROLE, SPAM_LIMIT, SPAM_TIMEOUT_SECONDS, EMBED_COLOR, WELCOME_IMAGE
 
+logger = logging.getLogger(__name__)
+
 
 class Welcome(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.spam_counts = {}
         self.message_times = {}
 
     def _create_welcome_embed(self, member, channel_mention: str = None):
@@ -36,6 +38,7 @@ class Welcome(commands.Cog):
 
         welcome_channel = self.bot.get_channel(WELCOME_CHANNEL)
         if not welcome_channel:
+            logger.warning(f"WELCOME_CHANNEL {WELCOME_CHANNEL} not found")
             return
 
         role = member.guild.get_role(BASE_ROLE)
