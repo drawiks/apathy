@@ -1,5 +1,4 @@
 from datetime import datetime
-import os
 import discord
 from discord.ext import commands
 
@@ -10,21 +9,8 @@ class Activity(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    def _create_embed(self, user, action: str, timestamp: str):
-        title = f"{user.name} запустил доту" if action == "join" else f"{user.name} вышел из доты"
-
-        embed = discord.Embed(
-            title=title,
-            color=EMBED_COLOR
-        )
-        embed.set_footer(text=f"время: {timestamp}")
-        return embed
-
-    def _get_gif_file(self, action: str):
-        gif_path = DOTA_JOIN_GIF if action == "join" else DOTA_LEAVE_GIF
-        if os.path.exists(gif_path):
-            return discord.File(gif_path)
-        return None
+    def _get_gif_path(self, action: str):
+        return DOTA_JOIN_GIF if action == "join" else DOTA_LEAVE_GIF
 
     @commands.Cog.listener()
     async def on_presence_update(self, before, after):
@@ -46,21 +32,27 @@ class Activity(commands.Cog):
 
         if after_dota and not before_dota:
             timestamp = datetime.now().strftime("%H:%M")
-            embed = self._create_embed(after, "join", timestamp)
-            file = self._get_gif_file("join")
-            if file:
-                await channel.send(embed=embed, file=file)
-            else:
-                await channel.send(embed=embed)
+            gif_path = self._get_gif_path("join")
+            file = discord.File(gif_path)
+            embed = discord.Embed(
+                title=f"{after.name} запустил доту",
+                color=EMBED_COLOR
+            )
+            embed.set_image(url=f"attachment://{gif_path}")
+            embed.set_footer(text=f"время: {timestamp}")
+            await channel.send(embed=embed, file=file)
 
         elif before_dota and not after_dota:
             timestamp = datetime.now().strftime("%H:%M")
-            embed = self._create_embed(after, "leave", timestamp)
-            file = self._get_gif_file("leave")
-            if file:
-                await channel.send(embed=embed, file=file)
-            else:
-                await channel.send(embed=embed)
+            gif_path = self._get_gif_path("leave")
+            file = discord.File(gif_path)
+            embed = discord.Embed(
+                title=f"{after.name} вышел из доты",
+                color=EMBED_COLOR
+            )
+            embed.set_image(url=f"attachment://{gif_path}")
+            embed.set_footer(text=f"время: {timestamp}")
+            await channel.send(embed=embed, file=file)
 
 
 async def setup(bot):
