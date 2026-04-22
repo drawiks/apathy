@@ -240,7 +240,7 @@ async def clear(interaction: discord.Interaction, amount: int):
     deleted = 0
     while amount > 0:
         batch = min(amount, 100)
-        messages = await interaction.channel.purge(limit=batch + 1)
+        messages = await interaction.channel.purge(limit=batch)
         deleted += len(messages)
         amount -= batch
         if amount > 0:
