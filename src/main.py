@@ -10,7 +10,7 @@ from discord.ext import commands
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import config
-from config import EMBED_COLOR
+from config import EMBED_COLOR, BASE_ROLE, ROLE_CHANNEL
 from utils.checks import is_moderator
 from utils.database import add_warning, get_warnings, remove_warnings
 
