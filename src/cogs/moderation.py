@@ -13,7 +13,6 @@ from utils.database import add_warning, get_warnings, remove_warnings
 class Moderation(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.bot.tree.copy_global_to(guild=None)
 
     @app_commands.command(name="kick", description="кик участника")
     async def kick(self, interaction: discord.Interaction, member: discord.Member, *, reason: str = "не указана"):
