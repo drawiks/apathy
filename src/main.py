@@ -27,6 +27,7 @@ intents.members = True
 intents.message_content = True
 intents.reactions = True
 intents.presences = True
+intents.voice_states = True
 
 bot = commands.Bot(
     command_prefix="!",
@@ -40,7 +41,7 @@ async def on_ready():
     logger.info(f"Bot started: {bot.user} (ID: {bot.user.id})")
 
     bot.role_messages = {}
-    extensions = ["cogs.welcome", "cogs.activity", "cogs.basic", "cogs.moderation", "cogs.modlog", "cogs.automod", "cogs.weekly_top"]
+    extensions = ["cogs.welcome", "cogs.activity", "cogs.basic", "cogs.moderation", "cogs.modlog", "cogs.automod", "cogs.weekly_top", "cogs.voice_rooms"]
     for ext in extensions:
         if ext in bot.extensions:
             await bot.reload_extension(ext)
