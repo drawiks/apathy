@@ -62,12 +62,16 @@ class Activity(commands.Cog):
                 redis_client.add_play_time(after.id, duration_seconds)
                 redis_client.remove_online(after.id)
 
+            total_seconds = redis_client.get_total_time(after.id)
+            total_time = self._format_duration(total_seconds)
+
             timestamp_str = datetime.now().strftime("%H:%M")
             gif_path = self._get_gif_path("leave")
             file = discord.File(gif_path)
             member_color = after.colour if after.colour != discord.Colour.default() else EMBED_COLOR
             embed = discord.Embed(
                 title=f"{after.display_name} ({after.name}) вышел из доты",
+                description=f"наиграл: {total_time}",
                 color=member_color
             )
             embed.set_image(url=f"attachment://{gif_path}")
