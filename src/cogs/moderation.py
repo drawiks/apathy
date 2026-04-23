@@ -14,6 +14,14 @@ class Moderation(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    def _get_modlog(self):
+        return self.bot.get_cog("Modlog")
+
+    async def _log_action(self, action: str, member: discord.Member, moderator: discord.Member, reason: str, color: int = EMBED_COLOR):
+        modlog = self._get_modlog()
+        if modlog:
+            await modlog.log_action(member.guild, action, member, moderator, reason, color)
+
     @app_commands.command(name="kick", description="кик участника")
     async def kick(self, interaction: discord.Interaction, member: discord.Member, *, reason: str = "не указана"):
         if not is_moderator(interaction.user):
@@ -29,6 +37,7 @@ class Moderation(commands.Cog):
             return
 
         await member.kick(reason=reason)
+        await self._log_action("кик", member, interaction.user, reason, 0xFFA500)
 
         embed = discord.Embed(
             title="кик",
@@ -53,6 +62,7 @@ class Moderation(commands.Cog):
             return
 
         await member.ban(reason=reason, delete_message_days=0)
+        await self._log_action("бан", member, interaction.user, reason, 0xFF0000)
 
         embed = discord.Embed(
             title="бан",
@@ -73,6 +83,8 @@ class Moderation(commands.Cog):
         except discord.NotFound:
             await interaction.response.send_message("пользователь не в бане", ephemeral=True)
             return
+
+        await self._log_action("разбан", user, interaction.user, reason, 0x00FF00)
 
         embed = discord.Embed(
             title="разбан",
@@ -100,6 +112,8 @@ class Moderation(commands.Cog):
             await interaction.response.send_message("недостаточно прав", ephemeral=True)
             return
 
+        await self._log_action(f"мут ({duration} мин)", member, interaction.user, reason)
+
         embed = discord.Embed(
             title="мут",
             description=f"{member} получил мут на {duration} минут.\nпричина: {reason}",
@@ -119,6 +133,8 @@ class Moderation(commands.Cog):
         except discord.Forbidden:
             await interaction.response.send_message("недостаточно прав", ephemeral=True)
             return
+
+        await self._log_action("размут", member, interaction.user, "снят модератором")
 
         embed = discord.Embed(
             title="размут",
@@ -149,6 +165,8 @@ class Moderation(commands.Cog):
             if amount > 0:
                 await asyncio.sleep(1)
 
+        await self._log_action(f"очистка ({deleted} сообщений)", interaction.user, interaction.user, "массовое удаление")
+
         embed = discord.Embed(
             title="фистинг",
             description=f"удалено {deleted} сообщений.",
@@ -164,6 +182,7 @@ class Moderation(commands.Cog):
             return
 
         add_warning(member.id, interaction.guild.id, reason, interaction.user.id)
+        await self._log_action("предупреждение", member, interaction.user, reason, 0xFFFF00)
 
         warnings = get_warnings(member.id, interaction.guild.id)
         warn_count = len(warnings)
@@ -211,6 +230,7 @@ class Moderation(commands.Cog):
             return
 
         remove_warnings(member.id, interaction.guild.id)
+        await self._log_action("предупреждения сняты", member, interaction.user, "сняты модератором")
 
         embed = discord.Embed(
             title="предупреждения сняты",

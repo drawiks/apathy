@@ -1,9 +1,9 @@
-import os
-from dotenv import load_dotenv
+from environs import Env
 
-load_dotenv()
+env = Env()
+env.read_env()
 
-TOKEN = os.getenv("BOT_TOKEN")
+TOKEN = env("BOT_TOKEN")
 
 WELCOME_CHANNEL = 1496221843022024936
 BASE_ROLE = 1496222857309720720
@@ -23,3 +23,14 @@ GAME_CHANNEL = 1496591080123142195
 GAME_NAME = "Dota 2"
 DOTA_JOIN_GIF = "dota_join.gif"
 DOTA_LEAVE_GIF = "dota_leave.gif"
+
+REDIS_HOST = "localhost"
+REDIS_PORT = 6379
+
+MODLOG_CHANNEL = 1496970675028496585
+
+AUTO_MOD_ENABLED = True
+GIF_DOMAINS = ["tenor.com", "media.tenor.com", "giphy.com", "media.giphy.com", "discord.com", "cdn.discordapp.com"]
+
+WEEKLY_TOP_ROLE = 1496972200471826645
+WEEKLY_TOP_DISPLAY = 5

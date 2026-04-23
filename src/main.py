@@ -40,7 +40,7 @@ async def on_ready():
     logger.info(f"Bot started: {bot.user} (ID: {bot.user.id})")
 
     bot.role_messages = {}
-    extensions = ["cogs.welcome", "cogs.activity", "cogs.basic", "cogs.moderation"]
+    extensions = ["cogs.welcome", "cogs.activity", "cogs.basic", "cogs.moderation", "cogs.modlog", "cogs.automod", "cogs.weekly_top"]
     for ext in extensions:
         if ext in bot.extensions:
             await bot.reload_extension(ext)

@@ -14,6 +14,14 @@ class Welcome(commands.Cog):
         self.bot = bot
         self.message_times = {}
 
+    def _get_modlog(self):
+        return self.bot.get_cog("Modlog")
+
+    async def _log_action(self, action: str, member: discord.Member, moderator: discord.Member, reason: str, color: int = EMBED_COLOR):
+        modlog = self._get_modlog()
+        if modlog:
+            await modlog.log_action(member.guild, action, member, moderator, reason, color)
+
     def _create_welcome_embed(self, member, channel_mention: str = None):
         role = member.guild.get_role(BASE_ROLE)
         role_channel = member.guild.get_channel(ROLE_CHANNEL)
@@ -85,6 +93,13 @@ class Welcome(commands.Cog):
                     discord.utils.utcnow() +
                     timedelta(seconds=SPAM_TIMEOUT_SECONDS),
                     reason="спам детект"
+                )
+                await self._log_action(
+                    f"таймаут ({SPAM_TIMEOUT_SECONDS // 60} мин)",
+                    message.author,
+                    message.author,
+                    "спам детект",
+                    0xFF0000
                 )
             except discord.Forbidden:
                 pass
