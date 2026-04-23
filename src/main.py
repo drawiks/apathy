@@ -40,10 +40,12 @@ async def on_ready():
     logger.info(f"Bot started: {bot.user} (ID: {bot.user.id})")
 
     bot.role_messages = {}
-    await bot.reload_extension("cogs.welcome")
-    await bot.reload_extension("cogs.activity")
-    await bot.reload_extension("cogs.basic")
-    await bot.reload_extension("cogs.moderation")
+    extensions = ["cogs.welcome", "cogs.activity", "cogs.basic", "cogs.moderation"]
+    for ext in extensions:
+        if ext in bot.extensions:
+            await bot.reload_extension(ext)
+        else:
+            await bot.load_extension(ext)
 
     try:
         synced = await bot.tree.sync()
