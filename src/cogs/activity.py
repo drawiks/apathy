@@ -36,7 +36,7 @@ class Activity(commands.Cog):
             file = discord.File(gif_path)
             member_color = after.colour if after.colour != discord.Colour.default() else EMBED_COLOR
             embed = discord.Embed(
-                title=f"{after.name} запустил доту",
+                title=f"{after.display_name} ({after.name}) запустил доту",
                 color=member_color
             )
             embed.set_image(url=f"attachment://{gif_path}")
@@ -49,7 +49,7 @@ class Activity(commands.Cog):
             file = discord.File(gif_path)
             member_color = after.colour if after.colour != discord.Colour.default() else EMBED_COLOR
             embed = discord.Embed(
-                title=f"{after.name} вышел из доты",
+                title=f"{after.display_name} ({after.name}) вышел из доты",
                 color=member_color
             )
             embed.set_image(url=f"attachment://{gif_path}")
