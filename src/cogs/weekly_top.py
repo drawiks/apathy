@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, time as dt_time
 import discord
 from discord.ext import commands
 from discord import app_commands
@@ -48,7 +48,7 @@ class WeeklyTop(commands.Cog):
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
-    @tasks.loop(time=datetime.time(hour=0, minute=0))
+    @tasks.loop(time=dt_time(hour=0, minute=0))
     async def weekly_check(self):
         now = datetime.now()
         if now.weekday() == 6:
