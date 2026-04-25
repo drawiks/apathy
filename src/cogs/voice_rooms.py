@@ -9,6 +9,9 @@ class VoiceRooms(commands.Cog):
         self.bot = bot
         self.temp_channels = {}
 
+    async def cog_unload(self):
+        self.temp_channels.clear()
+
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         if member.bot:

@@ -1,6 +1,8 @@
 import logging
 import sys
+import traceback
 from pathlib import Path
+from glob import glob
 
 import discord
 from discord.ext import commands
@@ -36,13 +38,39 @@ bot = commands.Bot(
 )
 
 
+async def command_error_handler(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
+        await ctx.send("команда не найдена.")
+    elif isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send(f"отсутствует обязательный аргумент: `{error.param.name}`")
+    elif isinstance(error, commands.MemberNotFound):
+        await ctx.send(f"участник `{error.argument}` не найден.")
+    elif isinstance(error, commands.BadArgument):
+        await ctx.send(f"неверный аргумент: {error}")
+    elif isinstance(error, commands.CommandOnCooldown):
+        await ctx.send(f"команда на кулдауне. попробуй через {error.retry_after:.1f} сек.")
+    elif isinstance(error, commands.CheckFailure):
+        await ctx.send("у тебя нет прав на эту команду.")
+    elif isinstance(error, commands.NotOwner):
+        await ctx.send("у тебя нет прав на эту команду.")
+    else:
+        logger.exception(f"Unhandled command error in {ctx.command}: {error}")
+        await ctx.send("произошла ошибка при выполнении команды.")
+
+
+bot.on_command_error = command_error_handler
+
+
 @bot.event
 async def on_ready():
     logger.info(f"Bot started: {bot.user} (ID: {bot.user.id})")
 
     bot.role_messages = {}
-    extensions = ["cogs.welcome", "cogs.activity", "cogs.basic", "cogs.moderation", "cogs.modlog", "cogs.automod", "cogs.weekly_top", "cogs.voice_rooms"]
-    for ext in extensions:
+    cogs_dir = Path(__file__).parent / "cogs"
+    for cog_file in cogs_dir.glob("*.py"):
+        if cog_file.stem == "__init__":
+            continue
+        ext = f"cogs.{cog_file.stem}"
         if ext in bot.extensions:
             await bot.reload_extension(ext)
         else:
@@ -55,6 +83,17 @@ async def on_ready():
         logger.error(f"failed to sync: {e}")
 
     logger.info("extensions loaded")
+
+
+@bot.event
+async def on_error(event, *args, **kwargs):
+    exc_info = sys.exc_info()
+    logger.error(f"Unhandled error in {event}: {exc_info[1]}", exc_info=exc_info)
+
+
+@bot.event
+async def on_rate_limit(error):
+    logger.warning(f"Rate limited: {error}")
 
 
 def main():

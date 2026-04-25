@@ -30,6 +30,7 @@ REDIS_PORT = 6379
 MODLOG_CHANNEL = 1496970675028496585
 
 AUTO_MOD_ENABLED = True
+FLOOD_CHANNEL = 1424317102063353980
 GIF_DOMAINS = ["tenor.com", "media.tenor.com", "giphy.com", "media.giphy.com", "discord.com", "cdn.discordapp.com"]
 
 WEEKLY_TOP_ROLE = 1496972200471826645
