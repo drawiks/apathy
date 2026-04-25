@@ -6,8 +6,9 @@ from discord import app_commands
 from discord.ext import commands
 
 from config import EMBED_COLOR
-from utils.checks import is_moderator
-from utils.database import add_warning, get_warnings, remove_warnings
+from core.checks import is_moderator
+from core.embeds import mod_action_embed
+from services import add_warning, get_warnings, remove_warnings
 
 
 class Moderation(commands.Cog):
@@ -39,11 +40,7 @@ class Moderation(commands.Cog):
         await member.kick(reason=reason)
         await self._log_action("кик", member, interaction.user, reason, 0xFFA500)
 
-        embed = discord.Embed(
-            title="кик",
-            description=f"{member} был кикнут.\nпричина: {reason}",
-            color=EMBED_COLOR
-        )
+        embed = mod_action_embed("кик", member, interaction.user, reason)
         embed.set_footer(text=f"модератор: {interaction.user}")
         await interaction.response.send_message(embed=embed)
 
@@ -64,11 +61,7 @@ class Moderation(commands.Cog):
         await member.ban(reason=reason, delete_message_days=0)
         await self._log_action("бан", member, interaction.user, reason, 0xFF0000)
 
-        embed = discord.Embed(
-            title="бан",
-            description=f"{member} был забанен.\nпричина: {reason}",
-            color=EMBED_COLOR
-        )
+        embed = mod_action_embed("бан", member, interaction.user, reason, color=0xFF0000)
         embed.set_footer(text=f"модератор: {interaction.user}")
         await interaction.response.send_message(embed=embed)
 
@@ -78,20 +71,11 @@ class Moderation(commands.Cog):
             await interaction.response.send_message("нет прав", ephemeral=True)
             return
 
-        try:
-            await interaction.guild.unban(user, reason=reason)
-        except discord.NotFound:
-            await interaction.response.send_message("пользователь не в бане", ephemeral=True)
-            return
-
+        await interaction.guild.unban(user, reason=reason)
         await self._log_action("разбан", user, interaction.user, reason, 0x00FF00)
 
-        embed = discord.Embed(
-            title="разбан",
-            description=f"{user} был разбанен.",
-            color=EMBED_COLOR
-        )
-        embed.set_footer(text=f"Модератор: {interaction.user}")
+        embed = mod_action_embed("разбан", user, interaction.user, reason, color=0x00FF00)
+        embed.set_footer(text=f"модератор: {interaction.user}")
         await interaction.response.send_message(embed=embed)
 
     @app_commands.command(name="mute", description="мут участника")
@@ -114,11 +98,7 @@ class Moderation(commands.Cog):
 
         await self._log_action(f"мут ({duration} мин)", member, interaction.user, reason)
 
-        embed = discord.Embed(
-            title="мут",
-            description=f"{member} получил мут на {duration} минут.\nпричина: {reason}",
-            color=EMBED_COLOR
-        )
+        embed = mod_action_embed(f"мут ({duration} мин)", member, interaction.user, reason)
         embed.set_footer(text=f"модератор: {interaction.user}")
         await interaction.response.send_message(embed=embed)
 
@@ -136,11 +116,7 @@ class Moderation(commands.Cog):
 
         await self._log_action("размут", member, interaction.user, "снят модератором")
 
-        embed = discord.Embed(
-            title="размут",
-            description=f"{member} был размучен.",
-            color=EMBED_COLOR
-        )
+        embed = mod_action_embed("размут", member, interaction.user, "снят модератором")
         embed.set_footer(text=f"модератор: {interaction.user}")
         await interaction.response.send_message(embed=embed)
 
@@ -167,11 +143,7 @@ class Moderation(commands.Cog):
 
         await self._log_action(f"очистка ({deleted} сообщений)", interaction.user, interaction.user, "массовое удаление")
 
-        embed = discord.Embed(
-            title="фистинг",
-            description=f"удалено {deleted} сообщений.",
-            color=EMBED_COLOR
-        )
+        embed = mod_action_embed(f"очистка ({deleted} сообщений)", interaction.user, interaction.user, "массовое удаление")
         embed.set_footer(text=f"модератор: {interaction.user}")
         await interaction.followup.send(embed=embed, ephemeral=True)
 
@@ -187,13 +159,7 @@ class Moderation(commands.Cog):
         warnings = get_warnings(member.id, interaction.guild.id)
         warn_count = len(warnings)
 
-        embed = discord.Embed(
-            title="предупреждение",
-            description=f"{member} получил предупреждение.\n"
-                        f"причина: {reason}\n"
-                        f"всего предупреждений: {warn_count}",
-            color=EMBED_COLOR
-        )
+        embed = mod_action_embed("предупреждение", member, interaction.user, f"{reason}\nвсего предупреждений: {warn_count}")
         embed.set_footer(text=f"модератор: {interaction.user}")
         await interaction.response.send_message(embed=embed)
 
@@ -232,11 +198,7 @@ class Moderation(commands.Cog):
         remove_warnings(member.id, interaction.guild.id)
         await self._log_action("предупреждения сняты", member, interaction.user, "сняты модератором")
 
-        embed = discord.Embed(
-            title="предупреждения сняты",
-            description=f"все предупреждения {member} были сняты.",
-            color=EMBED_COLOR
-        )
+        embed = mod_action_embed("предупреждения сняты", member, interaction.user, "сняты модератором")
         await interaction.response.send_message(embed=embed)
 
 

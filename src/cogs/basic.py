@@ -3,7 +3,8 @@ from discord import app_commands
 from discord.ext import commands
 
 from config import EMBED_COLOR, BASE_ROLE, ROLE_CHANNEL, ROLE_POSITIONS
-from utils.checks import is_moderator
+from core.checks import is_moderator
+from core.embeds import success_embed
 
 
 class Basic(commands.Cog):
@@ -13,11 +14,7 @@ class Basic(commands.Cog):
     @app_commands.command(name="ping", description="проверить задержку бота")
     async def ping(self, interaction: discord.Interaction):
         latency = round(self.bot.latency * 1000)
-        embed = discord.Embed(
-            title="pong",
-            description=f"задержка: {latency}мс",
-            color=EMBED_COLOR
-        )
+        embed = success_embed("pong", f"задержка: {latency}мс")
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(name="команды", description="список команд бота")
@@ -71,11 +68,7 @@ class Basic(commands.Cog):
             await interaction.response.send_message("нет прав", ephemeral=True)
             return
 
-        embed = discord.Embed(
-            title="выбери позицию (можно несколько)",
-            description="нажми на эмодзи для получения роли",
-            color=EMBED_COLOR
-        )
+        embed = success_embed("выбери позицию (можно несколько)", "нажми на эмодзи для получения роли")
 
         await interaction.response.send_message(embed=embed)
         msg = await interaction.original_response()

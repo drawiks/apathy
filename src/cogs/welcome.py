@@ -5,6 +5,7 @@ import discord
 from discord.ext import commands
 
 from config import WELCOME_CHANNEL, ROLE_CHANNEL, BASE_ROLE, SPAM_LIMIT, SPAM_TIMEOUT_SECONDS, EMBED_COLOR, WELCOME_IMAGE
+from core.checks import is_immune
 
 logger = logging.getLogger(__name__)
 
@@ -70,6 +71,9 @@ class Welcome(commands.Cog):
             return
 
         if message.guild is None:
+            return
+
+        if is_immune(message.author):
             return
 
         user_id = message.author.id

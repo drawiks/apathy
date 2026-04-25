@@ -3,6 +3,7 @@ import discord
 from discord.ext import commands
 
 from config import MODLOG_CHANNEL, EMBED_COLOR
+from core.embeds import mod_action_embed
 
 logger = logging.getLogger(__name__)
 
@@ -28,17 +29,7 @@ class Modlog(commands.Cog):
         reason: str = None,
         color: int = EMBED_COLOR
     ):
-        description = f"**участник:** {member.mention} ({member.name})\n"
-        if moderator:
-            description += f"**модератор:** {moderator.mention}\n"
-        if reason:
-            description += f"**причина:** {reason}"
-
-        embed = discord.Embed(
-            title=action,
-            description=description,
-            color=color
-        )
+        embed = mod_action_embed(action, member, moderator, reason, color)
         await self._send_log(guild, embed)
 
     async def log_message_delete(self, message: discord.Message, reason: str):

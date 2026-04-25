@@ -5,8 +5,8 @@ from discord import app_commands
 from discord.ext import tasks
 
 from config import GAME_CHANNEL, WEEKLY_TOP_ROLE, WEEKLY_TOP_DISPLAY, EMBED_COLOR, ROLE_EMOJI
+from services import redis_client
 from utils.formatters import format_duration
-from utils.redis import redis_client
 
 
 class WeeklyTop(commands.Cog):

@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 
 from config import AUTO_MOD_ENABLED, FLOOD_CHANNEL, GIF_DOMAINS, EMBED_COLOR
-from utils.checks import is_moderator
+from core.checks import is_moderator, is_immune
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,7 @@ class AutoMod(commands.Cog):
             return
         if message.channel.id == FLOOD_CHANNEL:
             return
-        if is_moderator(message.author):
+        if is_moderator(message.author) or is_immune(message.author):
             return
 
         content = message.content

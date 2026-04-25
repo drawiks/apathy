@@ -4,8 +4,8 @@ from discord import app_commands
 from discord.ext import commands
 
 from config import GAME_CHANNEL, GAME_NAME, DOTA_JOIN_GIF, DOTA_LEAVE_GIF, EMBED_COLOR
+from services import redis_client
 from utils.formatters import format_duration
-from utils.redis import redis_client
 
 
 class Activity(commands.Cog):

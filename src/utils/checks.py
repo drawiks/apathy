@@ -1,12 +1,3 @@
-from config import MODERATOR_ROLES
+from core.checks import is_moderator
 
-
-def is_moderator(user):
-    if not hasattr(user, 'guild') or user.guild is None:
-        return False
-    if user.guild_permissions.administrator:
-        return True
-    for role in user.roles:
-        if role.id in MODERATOR_ROLES:
-            return True
-    return False
+__all__ = ["is_moderator"]
