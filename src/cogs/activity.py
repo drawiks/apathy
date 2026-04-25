@@ -4,6 +4,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from config import GAME_CHANNEL, GAME_NAME, DOTA_JOIN_GIF, DOTA_LEAVE_GIF, EMBED_COLOR
+from utils.formatters import format_duration
 from utils.redis import redis_client
 
 
@@ -13,13 +14,6 @@ class Activity(commands.Cog):
 
     def _get_gif_path(self, action: str):
         return DOTA_JOIN_GIF if action == "join" else DOTA_LEAVE_GIF
-
-    def _format_duration(self, seconds: int):
-        hours = seconds // 3600
-        minutes = (seconds % 3600) // 60
-        if hours > 0:
-            return f"{hours}ч {minutes}м"
-        return f"{minutes}м"
 
     @commands.Cog.listener()
     async def on_presence_update(self, before, after):
@@ -63,7 +57,7 @@ class Activity(commands.Cog):
                 redis_client.remove_online(after.id)
 
             total_seconds = redis_client.get_total_time(after.id)
-            total_time = self._format_duration(total_seconds)
+            total_time = format_duration(total_seconds)
 
             timestamp_str = datetime.now().strftime("%H:%M")
             gif_path = self._get_gif_path("leave")
@@ -98,7 +92,7 @@ class Activity(commands.Cog):
                 duration = int(now - start_time)
                 embed.add_field(
                     name=member.display_name,
-                    value=self._format_duration(duration),
+                    value=format_duration(duration),
                     inline=False
                 )
 

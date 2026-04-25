@@ -43,7 +43,7 @@ class Modlog(commands.Cog):
 
     async def log_message_delete(self, message: discord.Message, reason: str):
         embed = discord.Embed(
-            title="Сообщение удалено",
+            title="сообщение удалено",
             description=f"**автор:** {message.author.mention}\n"
                         f"**канал:** {message.channel.mention}\n"
                         f"**причина:** {reason}",

@@ -2,7 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from config import EMBED_COLOR, BASE_ROLE, ROLE_CHANNEL
+from config import EMBED_COLOR, BASE_ROLE, ROLE_CHANNEL, ROLE_POSITIONS
 from utils.checks import is_moderator
 
 
@@ -70,14 +70,6 @@ class Basic(commands.Cog):
         if not is_moderator(interaction.user):
             await interaction.response.send_message("нет прав", ephemeral=True)
             return
-
-        ROLE_POSITIONS = {
-            "1️⃣": 1424326184585531543,
-            "2️⃣": 1424326316945309696,
-            "3️⃣": 1424326347676975206,
-            "4️⃣": 1424326409970516070,
-            "5️⃣": 1424326450651336714,
-        }
 
         embed = discord.Embed(
             title="выбери позицию (можно несколько)",

@@ -4,7 +4,8 @@ from discord.ext import commands
 from discord import app_commands
 from discord.ext import tasks
 
-from config import GAME_CHANNEL, WEEKLY_TOP_ROLE, WEEKLY_TOP_DISPLAY, EMBED_COLOR
+from config import GAME_CHANNEL, WEEKLY_TOP_ROLE, WEEKLY_TOP_DISPLAY, EMBED_COLOR, ROLE_EMOJI
+from utils.formatters import format_duration
 from utils.redis import redis_client
 
 
@@ -13,26 +14,18 @@ class WeeklyTop(commands.Cog):
         self.bot = bot
         self.weekly_check.start()
 
-    def _format_duration(self, seconds: int):
-        hours = seconds // 3600
-        minutes = (seconds % 3600) // 60
-        if hours > 0:
-            return f"{hours}ч {minutes}м"
-        return f"{minutes}м"
-
     def _format_leaderboard(self, guild: discord.Guild):
         leaderboard = redis_client.get_weekly_leaderboard(WEEKLY_TOP_DISPLAY)
         if not leaderboard:
             return "нет данных за эту неделю"
 
         lines = []
-        medals = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣"]
 
         for i, (user_id, seconds) in enumerate(leaderboard):
             member = guild.get_member(user_id)
             name = member.display_name if member else f"User {user_id}"
-            duration = self._format_duration(seconds)
-            lines.append(f"{medals[i]} **{name}** — {duration}")
+            duration = format_duration(seconds)
+            lines.append(f"{ROLE_EMOJI[i]} **{name}** — {duration}")
 
         return "\n".join(lines)
 
