@@ -97,7 +97,7 @@ class VoiceRooms(commands.Cog):
                     if existing:
                         existing["total_seconds"] = existing.get("total_seconds", 0) + duration_seconds
                         existing["weekly_seconds"] = existing.get("weekly_seconds", 0) + duration_seconds
-                        stats.update(existing, existing["id"])
+                        stats.update(existing, existing.get("doc_id"))
                     else:
                         stats.insert({
                             "user_id": owner_id,

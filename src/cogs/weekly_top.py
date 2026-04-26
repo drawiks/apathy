@@ -15,17 +15,32 @@ class WeeklyTop(commands.Cog):
         self.weekly_check.start()
 
     def _format_leaderboard(self, guild: discord.Guild):
-        leaderboard = redis_dota.get_leaderboard(guild.id, "dota", WEEKLY_TOP_DISPLAY)
-        if not leaderboard:
+        keys = redis_dota.get_all("weekly:*")
+        if not keys:
             return "нет данных за эту неделю"
 
-        lines = []
+        users = []
+        for key in keys:
+            try:
+                key_str = key.replace("dota:weekly:", "")
+                user_id = int(key_str)
+                seconds = int(redis_dota.get(key)) or 0
+                users.append((user_id, seconds))
+            except (ValueError, TypeError):
+                continue
 
-        for i, stats in enumerate(leaderboard):
-            member = guild.get_member(stats.user_id)
-            name = member.display_name if member else f"User {stats.user_id}"
-            duration = format_duration(stats.total_seconds)
-            lines.append(f"{ROLE_EMOJI[i]} **{name}** — {duration}")
+        if not users:
+            return "нет данных за эту неделю"
+
+        users.sort(key=lambda x: x[1], reverse=True)
+        users = users[:WEEKLY_TOP_DISPLAY]
+
+        lines = []
+        for i, (user_id, seconds) in enumerate(users, 1):
+            member = guild.get_member(user_id)
+            name = member.display_name if member else f"User {user_id}"
+            duration = format_duration(seconds)
+            lines.append(f"{ROLE_EMOJI[i-1]} **{name}** — {duration}")
 
         return "\n".join(lines)
 
@@ -44,13 +59,26 @@ class WeeklyTop(commands.Cog):
         if not channel:
             return
 
-        leaderboard = redis_dota.get_leaderboard(guild.id, "dota", 1)
-        if not leaderboard:
+        keys = redis_dota.get_all("weekly:*")
+        if not keys:
             return
 
-        winner_stats = leaderboard[0]
-        winner_id = winner_stats.user_id
-        winner = guild.get_member(winner_id)
+        users = []
+        for key in keys:
+            try:
+                key_str = key.replace("dota:weekly:", "")
+                user_id = int(key_str)
+                seconds = int(redis_dota.get(key)) or 0
+                users.append((user_id, seconds))
+            except (ValueError, TypeError):
+                continue
+
+        if not users:
+            return
+
+        users.sort(key=lambda x: x[1], reverse=True)
+        winner_id = users[0][0] if users else None
+        winner = guild.get_member(winner_id) if winner_id else None
 
         role = guild.get_role(WEEKLY_TOP_ROLE)
         if role:
