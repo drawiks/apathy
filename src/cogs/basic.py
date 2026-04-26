@@ -5,7 +5,7 @@ from discord.ext import commands
 from config import EMBED_COLOR, BASE_ROLE, ROLE_CHANNEL, ROLE_POSITIONS, ROLE_EMOJI
 from core.checks import is_moderator
 from core.embeds import success_embed
-from services import stats_repo, role_message_repo
+from repos import stats, role_message
 from utils.formatters import format_duration
 
 
@@ -76,7 +76,7 @@ class Basic(commands.Cog):
 
         for emoji, role_id in ROLE_POSITIONS.items():
             await msg.add_reaction(emoji)
-            role_message_repo.add(interaction.guild.id, msg.id, emoji, role_id)
+            role_message.add(interaction.guild.id, msg.id, emoji, role_id)
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
@@ -85,7 +85,7 @@ class Basic(commands.Cog):
         if payload.user_id == self.bot.user.id:
             return
 
-        role_messages = role_message_repo.get_by_message(payload.message_id)
+        role_messages = role_message.get_by_message(payload.message_id)
         for rm in role_messages:
             if rm.emoji == str(payload.emoji):
                 guild = self.bot.get_guild(payload.guild_id)
@@ -105,7 +105,7 @@ class Basic(commands.Cog):
         if payload.user_id == self.bot.user.id:
             return
 
-        role_messages = role_message_repo.get_by_message(payload.message_id)
+        role_messages = role_message.get_by_message(payload.message_id)
         for rm in role_messages:
             if rm.emoji == str(payload.emoji):
                 guild = self.bot.get_guild(payload.guild_id)
@@ -121,7 +121,7 @@ class Basic(commands.Cog):
     @app_commands.command(name="voice", description="показать время в голосовых")
     async def voice(self, interaction: discord.Interaction, member: discord.Member = None):
         target = member or interaction.user
-        total_seconds = stats_repo.get_total(target.id, interaction.guild.id, "voice")
+        total_seconds = stats.get_total(target.id, interaction.guild.id, "voice")
         
         if total_seconds == 0:
             await interaction.response.send_message(f"{target.display_name} ещё не был в голосовых", ephemeral=True)
@@ -133,7 +133,7 @@ class Basic(commands.Cog):
 
     @app_commands.command(name="voice_top", description="топ по голосовым")
     async def voice_top(self, interaction: discord.Interaction):
-        leaderboard = stats_repo.get_leaderboard(interaction.guild.id, "voice", 5)
+        leaderboard = stats.get_leaderboard(interaction.guild.id, "voice", 5)
         
         if not leaderboard:
             await interaction.response.send_message("нет данных", ephemeral=True)

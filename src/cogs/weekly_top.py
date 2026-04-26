@@ -5,7 +5,7 @@ from discord import app_commands
 from discord.ext import tasks
 
 from config import LOG_CHANNEL, WEEKLY_TOP_ROLE, WEEKLY_TOP_DISPLAY, EMBED_COLOR, ROLE_EMOJI
-from services import stats_repo
+from repos import redis_dota, stats
 from utils.formatters import format_duration
 
 
@@ -15,7 +15,7 @@ class WeeklyTop(commands.Cog):
         self.weekly_check.start()
 
     def _format_leaderboard(self, guild: discord.Guild):
-        leaderboard = stats_repo.get_leaderboard(guild.id, "dota", WEEKLY_TOP_DISPLAY)
+        leaderboard = redis_dota.get_leaderboard(guild.id, "dota", WEEKLY_TOP_DISPLAY)
         if not leaderboard:
             return "нет данных за эту неделю"
 
@@ -56,7 +56,7 @@ class WeeklyTop(commands.Cog):
         if not channel:
             return
 
-        leaderboard = stats_repo.get_leaderboard(guild.id, "dota", 1)
+        leaderboard = redis_dota.get_leaderboard(guild.id, "dota", 1)
         if not leaderboard:
             return
 
@@ -92,9 +92,11 @@ class WeeklyTop(commands.Cog):
 
         await channel.send(embed=embed)
 
-        dota_stats = stats_repo.table.search(stats_repo.table.where('game') == 'dota')
+        dota_stats = stats.find(game="dota")
         for stat in dota_stats:
-            stats_repo.table.remove(stats_repo.table.doc_id == stat.doc_id)
+            if stat.get("id"):
+                stat["weekly_seconds"] = 0
+                stats.update(stat, stat["id"])
 
 
 async def setup(bot):

@@ -8,7 +8,7 @@ from discord.ext import commands
 from config import EMBED_COLOR
 from core.checks import is_moderator
 from core.embeds import mod_action_embed
-from services import add_warning, get_warnings, remove_warnings
+from repos import warning
 
 
 class Moderation(commands.Cog):
@@ -173,10 +173,10 @@ class Moderation(commands.Cog):
             await interaction.response.send_message("нельзя предупредить бота", ephemeral=True)
             return
 
-        add_warning(member.id, interaction.guild.id, reason, interaction.user.id)
+        warning.add(member.id, interaction.guild.id, reason, interaction.user.id)
         await self._log_action("предупреждение", member, interaction.user, reason, 0xFFFF00)
 
-        warnings = get_warnings(member.id, interaction.guild.id)
+        warnings = warning.get_by_user(member.id, interaction.guild.id)
         warn_count = len(warnings)
 
         embed = mod_action_embed("предупреждение", member, interaction.user, f"{reason}\nвсего предупреждений: {warn_count}")
@@ -189,7 +189,7 @@ class Moderation(commands.Cog):
             await interaction.response.send_message("нет прав", ephemeral=True)
             return
 
-        warnings = get_warnings(member.id, interaction.guild.id)
+        warnings = warning.get_by_user(member.id, interaction.guild.id)
 
         if not warnings:
             await interaction.response.send_message(f"у {member} нет предупреждений.", ephemeral=True)
@@ -200,10 +200,10 @@ class Moderation(commands.Cog):
             color=EMBED_COLOR
         )
 
-        for i, w in enumerate(warnings, 1):
+                for i, w in enumerate(warnings, 1):
             embed.add_field(
                 name=f"#{i}",
-                value=w.get("reason", "без причины"),
+                value=w.reason,
                 inline=False
             )
 
@@ -219,7 +219,7 @@ class Moderation(commands.Cog):
             await interaction.response.send_message("нельзя снять предупреждения бота", ephemeral=True)
             return
 
-        remove_warnings(member.id, interaction.guild.id)
+        warning.remove_by_user(member.id, interaction.guild.id)
         await self._log_action("предупреждения сняты", member, interaction.user, "сняты модератором")
 
         embed = mod_action_embed("предупреждения сняты", member, interaction.user, "сняты модератором")

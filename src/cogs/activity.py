@@ -4,7 +4,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from config import LOG_CHANNEL, GAME_NAME, DOTA_JOIN_GIF, DOTA_LEAVE_GIF, EMBED_COLOR
-from services import redis_client, stats_repo
+from repos import redis_dota
 from utils.formatters import format_duration
 
 
@@ -34,8 +34,7 @@ class Activity(commands.Cog):
         )
 
         if after_dota and not before_dota:
-            timestamp = datetime.now().timestamp()
-            redis_client.set_online(f"dota:{after.id}", timestamp)
+            redis_dota.set(f"online:{after.id}", datetime.now().timestamp())
 
             timestamp_str = datetime.now().strftime("%H:%M")
             gif_path = self._get_gif_path("join")
@@ -50,19 +49,11 @@ class Activity(commands.Cog):
             await channel.send(embed=embed, file=file)
 
         elif before_dota and not after_dota:
-            start_timestamp = redis_client.get_online(f"dota:{after.id}")
+            start_timestamp = redis_dota.get(f"online:{after.id}")
             duration_seconds = 0
             if start_timestamp:
-                duration_seconds = int(datetime.now().timestamp() - start_timestamp)
-                redis_client.remove_online(f"dota:{after.id}")
-
-                if after.guild:
-                    stats_repo.add_time(
-                        after.id, 
-                        after.guild.id, 
-                        "dota", 
-                        duration_seconds
-                    )
+                duration_seconds = int(datetime.now().timestamp() - float(start_timestamp))
+                redis_dota.delete(f"online:{after.id}")
 
             session_time = format_duration(duration_seconds)
 
@@ -79,29 +70,36 @@ class Activity(commands.Cog):
             embed.set_footer(text=f"время: {timestamp_str}")
             await channel.send(embed=embed, file=file)
 
-    @app_commands.command(name="online", description="показать игроков в доте")
-    async def online(self, interaction: discord.Interaction):
-        keys = redis_client.client.keys("dota:*")
-        
-        if not keys:
-            await interaction.response.send_message("сейчас никто не играет в доту", ephemeral=True)
+    @app_commands.command(name="топ", description="топ по игрокам")
+    async def top(self, interaction: discord.Interaction):
+        keys = redis_dota.get_all("total:*")
+        users = []
+        for key in keys:
+            try:
+                user_id = int(key)
+                total = redis_dota.get(f"total:{user_id}")
+                if total:
+                    users.append((user_id, int(total)))
+            except (ValueError, TypeError):
+                continue
+
+        if not users:
+            await interaction.response.send_message("никто не играл", ephemeral=True)
             return
 
+        users.sort(key=lambda x: x[1], reverse=True)
+        lines = []
+        for i, (user_id, seconds) in enumerate(users[:5], 1):
+            member = interaction.guild.get_member(user_id)
+            name = member.display_name if member else f"User {user_id}"
+            time_str = format_duration(seconds)
+            lines.append(f"{i}. **{name}** - {time_str}")
+
         embed = discord.Embed(
-            title="сейчас в доте:",
+            title="топ по доте",
+            description="\n".join(lines),
             color=EMBED_COLOR
         )
-
-        for key in keys:
-            user_id = int(key.split(":")[1])
-            member = interaction.guild.get_member(user_id)
-            if member:
-                embed.add_field(
-                    name=member.display_name,
-                    value="•",
-                    inline=False
-                )
-
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
