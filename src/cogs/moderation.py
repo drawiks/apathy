@@ -173,10 +173,15 @@ class Moderation(commands.Cog):
             await interaction.response.send_message("нельзя предупредить бота", ephemeral=True)
             return
 
-        warning.add(member.id, interaction.guild.id, reason, interaction.user.id)
+        warning.insert({
+            "user_id": member.id,
+            "guild_id": interaction.guild.id,
+            "reason": reason,
+            "moderator_id": interaction.user.id
+        })
         await self._log_action("предупреждение", member, interaction.user, reason, 0xFFFF00)
 
-        warnings = warning.get_by_user(member.id, interaction.guild.id)
+        warnings = warning.find(user_id=member.id, guild_id=interaction.guild.id)
         warn_count = len(warnings)
 
         embed = mod_action_embed("предупреждение", member, interaction.user, f"{reason}\nвсего предупреждений: {warn_count}")
@@ -189,7 +194,7 @@ class Moderation(commands.Cog):
             await interaction.response.send_message("нет прав", ephemeral=True)
             return
 
-        warnings = warning.get_by_user(member.id, interaction.guild.id)
+        warnings = warning.find(user_id=member.id, guild_id=interaction.guild.id)
 
         if not warnings:
             await interaction.response.send_message(f"у {member} нет предупреждений.", ephemeral=True)
@@ -203,7 +208,7 @@ class Moderation(commands.Cog):
         for i, w in enumerate(warnings, 1):
             embed.add_field(
                 name=f"#{i}",
-                value=w.reason,
+                value=w.get("reason", "без причины"),
                 inline=False
             )
 
@@ -219,7 +224,10 @@ class Moderation(commands.Cog):
             await interaction.response.send_message("нельзя снять предупреждения бота", ephemeral=True)
             return
 
-        warning.remove_by_user(member.id, interaction.guild.id)
+        warnings_to_remove = warning.find(user_id=member.id, guild_id=interaction.guild.id)
+        for w in warnings_to_remove:
+            if w.get("id"):
+                warning.delete(w["id"])
         await self._log_action("предупреждения сняты", member, interaction.user, "сняты модератором")
 
         embed = mod_action_embed("предупреждения сняты", member, interaction.user, "сняты модератором")

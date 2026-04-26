@@ -76,7 +76,12 @@ class Basic(commands.Cog):
 
         for emoji, role_id in ROLE_POSITIONS.items():
             await msg.add_reaction(emoji)
-            role_message.add(interaction.guild.id, msg.id, emoji, role_id)
+            role_message.insert({
+                "guild_id": interaction.guild.id,
+                "message_id": msg.id,
+                "emoji": emoji,
+                "role_id": role_id
+            })
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
@@ -85,13 +90,13 @@ class Basic(commands.Cog):
         if payload.user_id == self.bot.user.id:
             return
 
-        role_messages = role_message.get_by_message(payload.message_id)
+        role_messages = role_message.find(message_id=payload.message_id)
         for rm in role_messages:
-            if rm.emoji == str(payload.emoji):
+            if rm.get("emoji") == str(payload.emoji):
                 guild = self.bot.get_guild(payload.guild_id)
                 if guild:
                     member = guild.get_member(payload.user_id)
-                    role = guild.get_role(rm.role_id)
+                    role = guild.get_role(rm.get("role_id"))
                     if member and role:
                         try:
                             await member.add_roles(role)
@@ -105,13 +110,13 @@ class Basic(commands.Cog):
         if payload.user_id == self.bot.user.id:
             return
 
-        role_messages = role_message.get_by_message(payload.message_id)
+        role_messages = role_message.find(message_id=payload.message_id)
         for rm in role_messages:
-            if rm.emoji == str(payload.emoji):
+            if rm.get("emoji") == str(payload.emoji):
                 guild = self.bot.get_guild(payload.guild_id)
                 if guild:
                     member = guild.get_member(payload.user_id)
-                    role = guild.get_role(rm.role_id)
+                    role = guild.get_role(rm.get("role_id"))
                     if member and role:
                         try:
                             await member.remove_roles(role)
@@ -121,29 +126,31 @@ class Basic(commands.Cog):
     @app_commands.command(name="voice", description="показать время в голосовых")
     async def voice(self, interaction: discord.Interaction, member: discord.Member = None):
         target = member or interaction.user
-        total_seconds = stats.get_total(target.id, interaction.guild.id, "voice")
+        total_seconds = stats.find_one(user_id=target.id, guild_id=interaction.guild.id, game="voice")
         
-        if total_seconds == 0:
+        if not total_seconds:
             await interaction.response.send_message(f"{target.display_name} ещё не был в голосовых", ephemeral=True)
             return
         
-        time_str = format_duration(total_seconds)
+        time_str = format_duration(total_seconds.get("total_seconds", 0))
         embed = success_embed("голосовые", f"{target.display_name} - {time_str}")
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(name="voice_top", description="топ по голосовым")
     async def voice_top(self, interaction: discord.Interaction):
-        leaderboard = stats.get_leaderboard(interaction.guild.id, "voice", 5)
+        leaderboard = stats.find(guild_id=interaction.guild.id, game="voice")
         
         if not leaderboard:
             await interaction.response.send_message("нет данных", ephemeral=True)
         
+        leaderboard.sort(key=lambda x: x.get("total_seconds", 0), reverse=True)
+        
         lines = []
-        for i, stats in enumerate(leaderboard):
-            member = interaction.guild.get_member(stats.user_id)
-            name = member.display_name if member else f"User {stats.user_id}"
-            time_str = format_duration(stats.total_seconds)
-            lines.append(f"{ROLE_EMOJI[i]} **{name}** - {time_str}")
+        for i, stat in enumerate(leaderboard[:5], 1):
+            member = interaction.guild.get_member(stat.get("user_id"))
+            name = member.display_name if member else f"User {stat.get('user_id')}"
+            time_str = format_duration(stat.get("total_seconds", 0))
+            lines.append(f"{ROLE_EMOJI[i-1]} **{name}** - {time_str}")
         
         embed = discord.Embed(
             title="топ по голосовым",
