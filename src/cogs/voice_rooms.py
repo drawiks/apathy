@@ -80,11 +80,13 @@ class VoiceRooms(commands.Cog):
                     )
 
                     session_time = format_duration(duration_seconds)
+                    member_color = member.colour if member.colour != discord.Colour.default() else EMBED_COLOR
                     embed = discord.Embed(
-                        title="выход из голосового",
-                        description=f"наиграл: {session_time}",
-                        color=EMBED_COLOR
+                        title=f"{member.display_name} ({member.name}) вышел из голосового",
+                        description=f"общался: {session_time}",
+                        color=member_color
                     )
+                    embed.set_thumbnail(url=member.display_avatar.url)
                     try:
                         log_channel = guild.get_channel(LOG_CHANNEL)
                         await log_channel.send(embed=embed)
