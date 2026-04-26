@@ -72,8 +72,7 @@ class Basic(commands.Cog):
 
         embed = success_embed("выбери позицию (можно несколько)", "нажми на эмодзи для получения роли")
 
-        await interaction.response.send_message(embed=embed)
-        msg = await interaction.original_response()
+        msg = await interaction.channel.send(embed=embed)
 
         for emoji in ROLE_POSITIONS.keys():
             await msg.add_reaction(emoji)
