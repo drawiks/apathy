@@ -2,9 +2,11 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from config import EMBED_COLOR, BASE_ROLE, ROLE_CHANNEL, ROLE_POSITIONS
+from config import EMBED_COLOR, BASE_ROLE, ROLE_CHANNEL, ROLE_POSITIONS, ROLE_EMOJI
 from core.checks import is_moderator
 from core.embeds import success_embed
+from services import stats_repo
+from utils.formatters import format_duration
 
 
 class Basic(commands.Cog):
@@ -26,7 +28,7 @@ class Basic(commands.Cog):
 
         embed.add_field(
             name="основные",
-            value="/ping - проверить задержку\n/команды - этот список",
+            value="/ping - проверить задержку\n/команды - этот список\n/voice [user] - время в голосовых\n/voice_top - топ",
             inline=False
         )
 
@@ -79,6 +81,40 @@ class Basic(commands.Cog):
         if interaction.guild.id not in self.bot.role_messages:
             self.bot.role_messages[interaction.guild.id] = {}
         self.bot.role_messages[interaction.guild.id][msg.id] = ROLE_POSITIONS
+
+    @app_commands.command(name="voice", description="показать время в голосовых")
+    async def voice(self, interaction: discord.Interaction, member: discord.Member = None):
+        target = member or interaction.user
+        total_seconds = stats_repo.get_total(target.id, interaction.guild.id, "voice")
+        
+        if total_seconds == 0:
+            await interaction.response.send_message(f"{target.display_name} ещё не был в голосовых", ephemeral=True)
+            return
+        
+        time_str = format_duration(total_seconds)
+        embed = success_embed("голосовые", f"{target.display_name} - {time_str}")
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+
+    @app_commands.command(name="voice_top", description="топ по голосовым")
+    async def voice_top(self, interaction: discord.Interaction):
+        leaderboard = stats_repo.get_leaderboard(interaction.guild.id, "voice", 5)
+        
+        if not leaderboard:
+            await interaction.response.send_message("нет данных", ephemeral=True)
+        
+        lines = []
+        for i, stats in enumerate(leaderboard):
+            member = interaction.guild.get_member(stats.user_id)
+            name = member.display_name if member else f"User {stats.user_id}"
+            time_str = format_duration(stats.total_seconds)
+            lines.append(f"{ROLE_EMOJI[i]} **{name}** - {time_str}")
+        
+        embed = discord.Embed(
+            title="топ по голосовым",
+            description="\n".join(lines),
+            color=EMBED_COLOR
+        )
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
 async def setup(bot):

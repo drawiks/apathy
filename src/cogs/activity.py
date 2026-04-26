@@ -4,7 +4,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from config import GAME_CHANNEL, GAME_NAME, DOTA_JOIN_GIF, DOTA_LEAVE_GIF, EMBED_COLOR
-from services import redis_client
+from services import redis_client, stats_repo
 from utils.formatters import format_duration
 
 
@@ -35,7 +35,7 @@ class Activity(commands.Cog):
 
         if after_dota and not before_dota:
             timestamp = datetime.now().timestamp()
-            redis_client.set_online(after.id, timestamp)
+            redis_client.set_online(f"dota:{after.id}", timestamp)
 
             timestamp_str = datetime.now().strftime("%H:%M")
             gif_path = self._get_gif_path("join")
@@ -50,14 +50,21 @@ class Activity(commands.Cog):
             await channel.send(embed=embed, file=file)
 
         elif before_dota and not after_dota:
-            start_timestamp = redis_client.get_online(after.id)
+            start_timestamp = redis_client.get_online(f"dota:{after.id}")
+            duration_seconds = 0
             if start_timestamp:
                 duration_seconds = int(datetime.now().timestamp() - start_timestamp)
-                redis_client.add_play_time(after.id, duration_seconds)
-                redis_client.remove_online(after.id)
+                redis_client.remove_online(f"dota:{after.id}")
 
-            total_seconds = redis_client.get_total_time(after.id)
-            total_time = format_duration(total_seconds)
+                if after.guild:
+                    stats_repo.add_time(
+                        after.id, 
+                        after.guild.id, 
+                        "dota", 
+                        duration_seconds
+                    )
+
+            session_time = format_duration(duration_seconds)
 
             timestamp_str = datetime.now().strftime("%H:%M")
             gif_path = self._get_gif_path("leave")
@@ -65,7 +72,7 @@ class Activity(commands.Cog):
             member_color = after.colour if after.colour != discord.Colour.default() else EMBED_COLOR
             embed = discord.Embed(
                 title=f"{after.display_name} ({after.name}) вышел из доты",
-                description=f"наиграл: {total_time}",
+                description=f"наиграл: {session_time}",
                 color=member_color
             )
             embed.set_image(url=f"attachment://{gif_path}")
@@ -74,25 +81,24 @@ class Activity(commands.Cog):
 
     @app_commands.command(name="online", description="показать игроков в доте")
     async def online(self, interaction: discord.Interaction):
-        online_data = redis_client.get_all_online()
-
-        if not online_data:
+        keys = redis_client.client.keys("dota:*")
+        
+        if not keys:
             await interaction.response.send_message("сейчас никто не играет в доту", ephemeral=True)
             return
 
-        now = datetime.now().timestamp()
         embed = discord.Embed(
             title="сейчас в доте:",
             color=EMBED_COLOR
         )
 
-        for user_id, start_time in online_data:
+        for key in keys:
+            user_id = int(key.split(":")[1])
             member = interaction.guild.get_member(user_id)
             if member:
-                duration = int(now - start_time)
                 embed.add_field(
                     name=member.display_name,
-                    value=format_duration(duration),
+                    value="•",
                     inline=False
                 )
 

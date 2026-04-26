@@ -1,7 +1,10 @@
+from datetime import datetime
 import discord
 from discord.ext import commands
 
-from config import VOICE_TEMPLATE_CHANNEL, VOICE_CATEGORY, VOICE_CHANNEL_NAME
+from config import VOICE_TEMPLATE_CHANNEL, VOICE_CATEGORY, VOICE_CHANNEL_NAME, VOICE_IGNORE_CHANNEL, EMBED_COLOR
+from services import redis_client, stats_repo
+from utils.formatters import format_duration
 
 
 class VoiceRooms(commands.Cog):
@@ -15,6 +18,14 @@ class VoiceRooms(commands.Cog):
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         if member.bot:
+            return
+
+        before_channel = before.channel
+        after_channel = after.channel
+
+        if after_channel and after_channel.id == VOICE_IGNORE_CHANNEL:
+            return
+        if before_channel and before_channel.id == VOICE_IGNORE_CHANNEL:
             return
 
         guild = member.guild
@@ -35,6 +46,9 @@ class VoiceRooms(commands.Cog):
 
             self.temp_channels[new_channel.id] = member.id
 
+            timestamp = datetime.now().timestamp()
+            redis_client.set_online(f"voice:{new_channel.id}:{member.id}", timestamp)
+
             try:
                 await member.move_to(new_channel)
             except discord.Forbidden:
@@ -47,6 +61,30 @@ class VoiceRooms(commands.Cog):
         elif before_channel and before_channel.id in self.temp_channels:
             if not before_channel.members:
                 owner_id = self.temp_channels.pop(before_channel.id, None)
+                join_timestamp = redis_client.get_online(f"voice:{before_channel.id}:{owner_id}")
+                
+                if join_timestamp:
+                    duration_seconds = int(datetime.now().timestamp() - join_timestamp)
+                    redis_client.remove_online(f"voice:{before_channel.id}:{owner_id}")
+
+                    stats_repo.add_time(
+                        owner_id,
+                        guild.id,
+                        "voice",
+                        duration_seconds
+                    )
+
+                    session_time = format_duration(duration_seconds)
+                    embed = discord.Embed(
+                        title="выход из голосового",
+                        description=f"наиграл: {session_time}",
+                        color=EMBED_COLOR
+                    )
+                    try:
+                        await member.send(embed=embed)
+                    except:
+                        pass
+
                 try:
                     await before_channel.delete()
                 except Exception:

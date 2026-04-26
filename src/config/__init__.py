@@ -16,6 +16,7 @@ from .channels import (
     FLOOD_CHANNEL,
     VOICE_TEMPLATE_CHANNEL,
     VOICE_CATEGORY,
+    VOICE_IGNORE_CHANNEL,
 )
 
 from .roles import (

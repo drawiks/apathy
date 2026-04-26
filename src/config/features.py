@@ -23,4 +23,4 @@ DOTA_LEAVE_GIF: str = "dota_leave.gif"
 GAME_NAME: str = "Dota 2"
 VOICE_CHANNEL_NAME: str = "комната-{user}"
 
-WEEKLY_TOP_DISPLAY: int = 5
+WEEKLY_TOP_DISPLAY: int = 3

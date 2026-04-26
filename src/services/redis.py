@@ -10,15 +10,23 @@ class RedisClient:
             decode_responses=True
         )
 
-    def set_online(self, user_id: int, timestamp: float) -> None:
-        self.client.set(f"dota:online:{user_id}", timestamp)
+    def set_online(self, key: str, timestamp: float) -> None:
+        self.client.set(f"{key}", timestamp)
 
-    def get_online(self, user_id: int) -> float | None:
-        value = self.client.get(f"dota:online:{user_id}")
+    def get_online(self, key: str) -> float | None:
+        value = self.client.get(f"{key}")
         return float(value) if value else None
 
-    def remove_online(self, user_id: int) -> None:
-        self.client.delete(f"dota:online:{user_id}")
+    def remove_online(self, key: str) -> None:
+        self.client.delete(f"{key}")
+
+    def get_all(self, pattern: str) -> list[tuple[str, float]]:
+        keys = self.client.keys(pattern)
+        result = []
+        for key in keys:
+            timestamp = self.client.get(key)
+            result.append((key, float(timestamp)))
+        return result
 
     def get_all_online(self) -> list[tuple[int, float]]:
         keys = self.client.keys("dota:online:*")
