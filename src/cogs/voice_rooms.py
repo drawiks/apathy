@@ -2,7 +2,7 @@ from datetime import datetime
 import discord
 from discord.ext import commands
 
-from config import VOICE_TEMPLATE_CHANNEL, VOICE_CATEGORY, VOICE_CHANNEL_NAME, VOICE_IGNORE_CHANNEL, EMBED_COLOR
+from config import VOICE_TEMPLATE_CHANNEL, VOICE_CATEGORY, VOICE_CHANNEL_NAME, VOICE_IGNORE_CHANNEL, LOG_CHANNEL, EMBED_COLOR
 from services import redis_client, stats_repo
 from utils.formatters import format_duration
 
@@ -81,7 +81,8 @@ class VoiceRooms(commands.Cog):
                         color=EMBED_COLOR
                     )
                     try:
-                        await member.send(embed=embed)
+                        log_channel = guild.get_channel(LOG_CHANNEL)
+                        await log_channel.send(embed=embed)
                     except:
                         pass
 

@@ -11,7 +11,7 @@ from .settings import (
 from .channels import (
     WELCOME_CHANNEL,
     ROLE_CHANNEL,
-    GAME_CHANNEL,
+    LOG_CHANNEL,
     MODLOG_CHANNEL,
     FLOOD_CHANNEL,
     VOICE_TEMPLATE_CHANNEL,
