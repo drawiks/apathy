@@ -70,38 +70,6 @@ class Activity(commands.Cog):
             embed.set_footer(text=f"время: {timestamp_str}")
             await channel.send(embed=embed, file=file)
 
-    @app_commands.command(name="топ", description="топ по игрокам")
-    async def top(self, interaction: discord.Interaction):
-        keys = redis_dota.get_all("total:*")
-        users = []
-        for key in keys:
-            try:
-                user_id = int(key)
-                total = redis_dota.get(f"total:{user_id}")
-                if total:
-                    users.append((user_id, int(total)))
-            except (ValueError, TypeError):
-                continue
-
-        if not users:
-            await interaction.response.send_message("никто не играл", ephemeral=True)
-            return
-
-        users.sort(key=lambda x: x[1], reverse=True)
-        lines = []
-        for i, (user_id, seconds) in enumerate(users[:5], 1):
-            member = interaction.guild.get_member(user_id)
-            name = member.display_name if member else f"User {user_id}"
-            time_str = format_duration(seconds)
-            lines.append(f"{i}. **{name}** - {time_str}")
-
-        embed = discord.Embed(
-            title="топ по доте",
-            description="\n".join(lines),
-            color=EMBED_COLOR
-        )
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-
 
 async def setup(bot):
     await bot.add_cog(Activity(bot))

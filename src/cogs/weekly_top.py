@@ -29,18 +29,6 @@ class WeeklyTop(commands.Cog):
 
         return "\n".join(lines)
 
-    @app_commands.command(name="топ", description="показать топ игроков за неделю")
-    async def топ(self, interaction: discord.Interaction):
-        leaderboard_text = self._format_leaderboard(interaction.guild)
-
-        embed = discord.Embed(
-            title="🏆 топ игроков за неделю",
-            description=leaderboard_text,
-            color=EMBED_COLOR
-        )
-
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-
     @tasks.loop(time=dt_time(hour=0, minute=0))
     async def weekly_check(self):
         now = datetime.now()
