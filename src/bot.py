@@ -99,7 +99,6 @@ class ApathyBot(commands.Bot):
     
     async def on_ready(self) -> None:
         self.logger.info(f"Bot started: {self.user} (ID: {self.user.id})")
-        self.role_messages = {}
         await self.load_cogs()
         
         try:

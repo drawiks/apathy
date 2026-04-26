@@ -5,7 +5,7 @@ from discord.ext import commands
 from config import EMBED_COLOR, BASE_ROLE, ROLE_CHANNEL, ROLE_POSITIONS, ROLE_EMOJI
 from core.checks import is_moderator
 from core.embeds import success_embed
-from services import stats_repo
+from services import stats_repo, role_message_repo
 from utils.formatters import format_duration
 
 
@@ -74,12 +74,49 @@ class Basic(commands.Cog):
 
         msg = await interaction.channel.send(embed=embed)
 
-        for emoji in ROLE_POSITIONS.keys():
+        for emoji, role_id in ROLE_POSITIONS.items():
             await msg.add_reaction(emoji)
+            role_message_repo.add(interaction.guild.id, msg.id, emoji, role_id)
 
-        if interaction.guild.id not in self.bot.role_messages:
-            self.bot.role_messages[interaction.guild.id] = {}
-        self.bot.role_messages[interaction.guild.id][msg.id] = ROLE_POSITIONS
+    @commands.Cog.listener()
+    async def on_raw_reaction_add(self, payload):
+        if payload.guild_id is None:
+            return
+        if payload.user_id == self.bot.user.id:
+            return
+
+        role_messages = role_message_repo.get_by_message(payload.message_id)
+        for rm in role_messages:
+            if rm.emoji == str(payload.emoji):
+                guild = self.bot.get_guild(payload.guild_id)
+                if guild:
+                    member = guild.get_member(payload.user_id)
+                    role = guild.get_role(rm.role_id)
+                    if member and role:
+                        try:
+                            await member.add_roles(role)
+                        except discord.Forbidden:
+                            pass
+
+    @commands.Cog.listener()
+    async def on_raw_reaction_remove(self, payload):
+        if payload.guild_id is None:
+            return
+        if payload.user_id == self.bot.user.id:
+            return
+
+        role_messages = role_message_repo.get_by_message(payload.message_id)
+        for rm in role_messages:
+            if rm.emoji == str(payload.emoji):
+                guild = self.bot.get_guild(payload.guild_id)
+                if guild:
+                    member = guild.get_member(payload.user_id)
+                    role = guild.get_role(rm.role_id)
+                    if member and role:
+                        try:
+                            await member.remove_roles(role)
+                        except discord.Forbidden:
+                            pass
 
     @app_commands.command(name="voice", description="показать время в голосовых")
     async def voice(self, interaction: discord.Interaction, member: discord.Member = None):
