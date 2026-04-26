@@ -2,7 +2,7 @@ from datetime import datetime
 import discord
 from discord.ext import commands
 
-from config import VOICE_TEMPLATE_CHANNEL, VOICE_CATEGORY, VOICE_CHANNEL_NAME, VOICE_IGNORE_CHANNEL, LOG_CHANNEL, EMBED_COLOR
+from config import VOICE_TEMPLATE_CHANNEL, VOICE_CATEGORY, VOICE_CHANNEL_NAME, VOICE_IGNORE_CHANNEL, GUILD, LOG_CHANNEL, EMBED_COLOR
 from services import redis_client, stats_repo
 from utils.formatters import format_duration
 
@@ -11,6 +11,24 @@ class VoiceRooms(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.temp_channels = {}
+
+    async def cog_load(self):
+        guild = self.bot.get_guild(GUILD)
+        if guild:
+            await self._sync_channels(guild)
+
+    async def _sync_channels(self, guild):
+        cached = redis_client.get_all_channel_owners()
+        for channel_id, owner_id in cached.items():
+            channel = guild.get_channel(channel_id)
+            if channel:
+                members = [m for m in channel.members if not m.bot]
+                if len(members) == 1 and members[0].id == owner_id:
+                    self.temp_channels[channel_id] = owner_id
+                elif len(members) > 1:
+                    pass
+            else:
+                redis_client.remove_channel_owner(channel_id)
 
     async def cog_unload(self):
         self.temp_channels.clear()
@@ -42,6 +60,7 @@ class VoiceRooms(commands.Cog):
             )
 
             self.temp_channels[new_channel.id] = member.id
+            redis_client.set_channel_owner(new_channel.id, member.id)
 
             timestamp = datetime.now().timestamp()
             redis_client.set_online(f"voice:{new_channel.id}:{member.id}", timestamp)
@@ -63,9 +82,11 @@ class VoiceRooms(commands.Cog):
                 if remaining_members:
                     new_owner = remaining_members[0]
                     self.temp_channels[before_channel.id] = new_owner.id
+                    redis_client.set_channel_owner(before_channel.id, new_owner.id)
                     timestamp = datetime.now().timestamp()
                     redis_client.set_online(f"voice:{before_channel.id}:{new_owner.id}", timestamp)
                 owner_id = self.temp_channels.pop(before_channel.id, None)
+                redis_client.remove_channel_owner(before_channel.id)
                 join_timestamp = redis_client.get_online(f"voice:{before_channel.id}:{owner_id}")
                 
                 if join_timestamp:

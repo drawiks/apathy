@@ -64,5 +64,19 @@ class RedisClient:
         if keys:
             self.client.delete(*keys)
 
+    def set_channel_owner(self, channel_id: int, owner_id: int) -> None:
+        self.client.hset("voice:channels", channel_id, owner_id)
+
+    def get_channel_owner(self, channel_id: int) -> int | None:
+        value = self.client.hget("voice:channels", channel_id)
+        return int(value) if value else None
+
+    def remove_channel_owner(self, channel_id: int) -> None:
+        self.client.hdel("voice:channels", channel_id)
+
+    def get_all_channel_owners(self) -> dict[int, int]:
+        data = self.client.hgetall("voice:channels")
+        return {int(k): int(v) for k, v in data.items()}
+
 
 redis_client = RedisClient()

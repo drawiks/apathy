@@ -17,6 +17,7 @@ from .channels import (
     VOICE_TEMPLATE_CHANNEL,
     VOICE_CATEGORY,
     VOICE_IGNORE_CHANNEL,
+    GUILD,
 )
 
 from .roles import (
