@@ -200,7 +200,7 @@ class Moderation(commands.Cog):
             color=EMBED_COLOR
         )
 
-                for i, w in enumerate(warnings, 1):
+        for i, w in enumerate(warnings, 1):
             embed.add_field(
                 name=f"#{i}",
                 value=w.reason,
