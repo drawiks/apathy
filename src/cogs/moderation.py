@@ -29,6 +29,10 @@ class Moderation(commands.Cog):
             await interaction.response.send_message("нет прав", ephemeral=True)
             return
 
+        if member.bot:
+            await interaction.response.send_message("нельзя кикнуть бота", ephemeral=True)
+            return
+
         if member == interaction.user:
             await interaction.response.send_message("нельзя кикнуть самого себя", ephemeral=True)
             return
@@ -48,6 +52,10 @@ class Moderation(commands.Cog):
     async def ban(self, interaction: discord.Interaction, member: discord.Member, *, reason: str = "не указана"):
         if not is_moderator(interaction.user):
             await interaction.response.send_message("нет прав", ephemeral=True)
+            return
+
+        if member.bot:
+            await interaction.response.send_message("нельзя забанить бота", ephemeral=True)
             return
 
         if member == interaction.user:
@@ -84,6 +92,10 @@ class Moderation(commands.Cog):
             await interaction.response.send_message("нет прав", ephemeral=True)
             return
 
+        if member.bot:
+            await interaction.response.send_message("нельзя замутить бота", ephemeral=True)
+            return
+
         if member.id == interaction.user.id:
             await interaction.response.send_message("нельзя замутить самого себя", ephemeral=True)
             return
@@ -106,6 +118,10 @@ class Moderation(commands.Cog):
     async def unmute(self, interaction: discord.Interaction, member: discord.Member):
         if not is_moderator(interaction.user):
             await interaction.response.send_message("нет прав", ephemeral=True)
+            return
+
+        if member.bot:
+            await interaction.response.send_message("нельзя размутить бота", ephemeral=True)
             return
 
         try:
@@ -153,6 +169,10 @@ class Moderation(commands.Cog):
             await interaction.response.send_message("нет прав", ephemeral=True)
             return
 
+        if member.bot:
+            await interaction.response.send_message("нельзя предупредить бота", ephemeral=True)
+            return
+
         add_warning(member.id, interaction.guild.id, reason, interaction.user.id)
         await self._log_action("предупреждение", member, interaction.user, reason, 0xFFFF00)
 
@@ -193,6 +213,10 @@ class Moderation(commands.Cog):
     async def unwarn(self, interaction: discord.Interaction, member: discord.Member):
         if not is_moderator(interaction.user):
             await interaction.response.send_message("нет прав", ephemeral=True)
+            return
+
+        if member.bot:
+            await interaction.response.send_message("нельзя снять предупреждения бота", ephemeral=True)
             return
 
         remove_warnings(member.id, interaction.guild.id)

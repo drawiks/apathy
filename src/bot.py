@@ -57,29 +57,30 @@ class ApathyBot(commands.Bot):
         ctx: commands.Context, 
         error: commands.CommandError
     ) -> None:
-        if isinstance(error, commands.CommandNotFound):
-            await ctx.send("команда не найдена.")
-        elif isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(
-                f"отсутствует обязательный аргумент: `{error.param.name}`"
-            )
-        elif isinstance(error, commands.MemberNotFound):
-            await ctx.send(f"участник `{error.argument}` не найден.")
-        elif isinstance(error, commands.BadArgument):
-            await ctx.send(f"неверный аргумент: {error}")
-        elif isinstance(error, commands.CommandOnCooldown):
-            await ctx.send(
-                f"команда на кулдауне. попробуй через {error.retry_after:.1f} сек."
-            )
-        elif isinstance(error, commands.CheckFailure):
-            await ctx.send("у тебя нет прав на эту команду.")
-        elif isinstance(error, commands.NotOwner):
-            await ctx.send("у тебя нет прав на эту команду.")
-        else:
-            self.logger.exception(
-                f"Unhandled error in {ctx.command}: {error}"
-            )
-            await ctx.send("произошла ошибка при выполнении команды.")
+        match error:
+            case commands.CommandNotFound():
+                await ctx.send("команда не найдена.")
+            case commands.MissingRequiredArgument() as e:
+                await ctx.send(
+                    f"отсутствует обязательный аргумент: `{e.param.name}`"
+                )
+            case commands.MemberNotFound() as e:
+                await ctx.send(f"участник `{e.argument}` не найден.")
+            case commands.BadArgument() as e:
+                await ctx.send(f"неверный аргумент: {e}")
+            case commands.CommandOnCooldown() as e:
+                await ctx.send(
+                    f"команда на кулдауне. попробуй через {e.retry_after:.1f} сек."
+                )
+            case commands.CheckFailure():
+                await ctx.send("у тебя нет прав на эту команду.")
+            case commands.NotOwner():
+                await ctx.send("у тебя нет прав на эту команду.")
+            case _:
+                self.logger.exception(
+                    f"Unhandled error in {ctx.command}: {error}"
+                )
+                await ctx.send("произошла ошибка при выполнении команды.")
     
     async def load_cogs(self) -> None:
         cogs_dir = Path(__file__).parent / "cogs"
