@@ -3,7 +3,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from config import GAME_CHANNEL, GAME_NAME, DOTA_JOIN_GIF, DOTA_LEAVE_GIF, EMBED_COLOR
+from config import LOG_CHANNEL, GAME_NAME, DOTA_JOIN_GIF, DOTA_LEAVE_GIF, EMBED_COLOR
 from services import redis_client, stats_repo
 from utils.formatters import format_duration
 
@@ -20,7 +20,7 @@ class Activity(commands.Cog):
         if after.bot:
             return
 
-        channel = self.bot.get_channel(GAME_CHANNEL)
+        channel = self.bot.get_channel(LOG_CHANNEL)
         if not channel:
             return
 

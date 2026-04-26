@@ -4,7 +4,7 @@ from discord.ext import commands
 from discord import app_commands
 from discord.ext import tasks
 
-from config import GAME_CHANNEL, WEEKLY_TOP_ROLE, WEEKLY_TOP_DISPLAY, EMBED_COLOR, ROLE_EMOJI
+from config import LOG_CHANNEL, WEEKLY_TOP_ROLE, WEEKLY_TOP_DISPLAY, EMBED_COLOR, ROLE_EMOJI
 from services import stats_repo
 from utils.formatters import format_duration
 
@@ -52,7 +52,7 @@ class WeeklyTop(commands.Cog):
             return
 
         guild = self.bot.guilds[0]
-        channel = guild.get_channel(GAME_CHANNEL)
+        channel = guild.get_channel(LOG_CHANNEL)
         if not channel:
             return
 
@@ -92,7 +92,9 @@ class WeeklyTop(commands.Cog):
 
         await channel.send(embed=embed)
 
-        stats_repo.db.drop_table("stats")
+        dota_stats = stats_repo.table.search(stats_repo.table.where('game') == 'dota')
+        for stat in dota_stats:
+            stats_repo.table.remove(stats_repo.table.doc_id == stat.doc_id)
 
 
 async def setup(bot):

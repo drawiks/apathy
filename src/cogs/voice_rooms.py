@@ -20,6 +20,10 @@ class VoiceRooms(commands.Cog):
         if member.bot:
             return
 
+        guild = member.guild
+        template_channel = guild.get_channel(VOICE_TEMPLATE_CHANNEL)
+        category = guild.get_channel(VOICE_CATEGORY)
+
         before_channel = before.channel
         after_channel = after.channel
 
@@ -27,13 +31,6 @@ class VoiceRooms(commands.Cog):
             return
         if before_channel and before_channel.id == VOICE_IGNORE_CHANNEL:
             return
-
-        guild = member.guild
-        template_channel = guild.get_channel(VOICE_TEMPLATE_CHANNEL)
-        category = guild.get_channel(VOICE_CATEGORY)
-
-        before_channel = before.channel
-        after_channel = after.channel
 
         if after_channel and after_channel.id == VOICE_TEMPLATE_CHANNEL:
             channel_name = VOICE_CHANNEL_NAME.replace("{user}", member.display_name)
@@ -59,7 +56,15 @@ class VoiceRooms(commands.Cog):
                 return
 
         elif before_channel and before_channel.id in self.temp_channels:
-            if not before_channel.members:
+            owner_id = self.temp_channels.get(before_channel.id)
+            
+            if owner_id == member.id:
+                remaining_members = [m for m in before_channel.members if not m.bot]
+                if remaining_members:
+                    new_owner = remaining_members[0]
+                    self.temp_channels[before_channel.id] = new_owner.id
+                    timestamp = datetime.now().timestamp()
+                    redis_client.set_online(f"voice:{before_channel.id}:{new_owner.id}", timestamp)
                 owner_id = self.temp_channels.pop(before_channel.id, None)
                 join_timestamp = redis_client.get_online(f"voice:{before_channel.id}:{owner_id}")
                 
