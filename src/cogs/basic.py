@@ -142,6 +142,7 @@ class Basic(commands.Cog):
         
         if not leaderboard:
             await interaction.response.send_message("нет данных", ephemeral=True)
+            return
         
         leaderboard.sort(key=lambda x: x.get("total_seconds", 0), reverse=True)
         
