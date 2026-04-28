@@ -226,8 +226,8 @@ class Moderation(commands.Cog):
 
         warnings_to_remove = warning.find(user_id=member.id, guild_id=interaction.guild.id)
         for w in warnings_to_remove:
-            if w.get("id"):
-                warning.delete(w["id"])
+            if w.get("doc_id"):
+                warning.delete(w["doc_id"])
         await self._log_action("предупреждения сняты", member, interaction.user, "сняты модератором")
 
         embed = mod_action_embed("предупреждения сняты", member, interaction.user, "сняты модератором")

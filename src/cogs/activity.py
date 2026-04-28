@@ -55,6 +55,10 @@ class Activity(commands.Cog):
                 duration_seconds = int(datetime.now().timestamp() - float(start_timestamp))
                 redis_dota.delete(f"online:{after.id}")
 
+                weekly_key = f"weekly:{after.id}"
+                current_weekly = int(redis_dota.get(weekly_key) or 0)
+                redis_dota.set(weekly_key, current_weekly + duration_seconds)
+
             session_time = format_duration(duration_seconds)
 
             timestamp_str = datetime.now().strftime("%H:%M")

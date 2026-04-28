@@ -6,7 +6,7 @@ ROLE_POSITIONS: dict[str, int] = {
     "5️⃣": 1424326450651336714,
 }
 
-ROLE_EMOJI: list[str] = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣"]
+ROLE_EMOJI: list[str] = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"]
 
 GIF_DOMAINS: list[str] = [
     "tenor.com",
@@ -17,7 +17,7 @@ GIF_DOMAINS: list[str] = [
     "cdn.discordapp.com",
 ]
 
-WELCOME_IMAGE: str = "welcome.png"
+WELCOME_GIF: str = "welcome.png"
 DOTA_JOIN_GIF: str = "dota_join.gif"
 DOTA_LEAVE_GIF: str = "dota_leave.gif"
 GAME_NAME: str = "Dota 2"

@@ -22,7 +22,7 @@ class WeeklyTop(commands.Cog):
         users = []
         for key in keys:
             try:
-                key_str = key.replace("dota:weekly:", "")
+                key_str = key.replace("weekly:", "")
                 user_id = int(key_str)
                 seconds = int(redis_dota.get(key)) or 0
                 users.append((user_id, seconds))
@@ -66,7 +66,7 @@ class WeeklyTop(commands.Cog):
         users = []
         for key in keys:
             try:
-                key_str = key.replace("dota:weekly:", "")
+                key_str = key.replace("weekly:", "")
                 user_id = int(key_str)
                 seconds = int(redis_dota.get(key)) or 0
                 users.append((user_id, seconds))
@@ -110,9 +110,12 @@ class WeeklyTop(commands.Cog):
 
         dota_stats = stats.find(game="dota")
         for stat in dota_stats:
-            if stat.get("id"):
+            if stat.get("doc_id"):
                 stat["weekly_seconds"] = 0
-                stats.update(stat, stat["id"])
+                stats.update(stat, stat["doc_id"])
+
+        for key in keys:
+            redis_dota.delete(key)
 
 
 async def setup(bot):

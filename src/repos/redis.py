@@ -24,5 +24,6 @@ class RedisRepo:
         self._client.delete(self._key(key))
 
     def get_all(self, pattern: str = "*") -> list[str]:
-        keys = self._client.keys(self._key(pattern))
-        return [self._client.get(k) for k in keys if self._client.get(k)]
+        full_keys = self._client.keys(self._key(pattern))
+        prefix_len = len(self._prefix) + 1
+        return [k[prefix_len:] for k in full_keys]

@@ -4,7 +4,7 @@ from datetime import timedelta
 import discord
 from discord.ext import commands
 
-from config import WELCOME_CHANNEL, ROLE_CHANNEL, BASE_ROLE, SPAM_LIMIT, SPAM_TIMEOUT_SECONDS, EMBED_COLOR, WELCOME_IMAGE
+from config import WELCOME_CHANNEL, ROLE_CHANNEL, BASE_ROLE, SPAM_LIMIT, SPAM_TIMEOUT_SECONDS, EMBED_COLOR, WELCOME_GIF
 from core.checks import is_immune
 
 logger = logging.getLogger(__name__)
@@ -36,7 +36,7 @@ class Welcome(commands.Cog):
         )
         embed.set_thumbnail(url=member.display_avatar.url)
         embed.set_footer(text=f"ID: {member.id}")
-        if os.path.exists(WELCOME_IMAGE):
+        if os.path.exists(WELCOME_GIF):
             embed.set_image(url="attachment://welcome.png")
         return embed
 
@@ -59,8 +59,8 @@ class Welcome(commands.Cog):
 
         embed = self._create_welcome_embed(member)
 
-        if os.path.exists(WELCOME_IMAGE):
-            file = discord.File(WELCOME_IMAGE)
+        if os.path.exists(WELCOME_GIF):
+            file = discord.File(WELCOME_GIF)
             await welcome_channel.send(embed=embed, file=file)
         else:
             await welcome_channel.send(embed=embed)
