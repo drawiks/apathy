@@ -17,9 +17,9 @@ GIF_DOMAINS: list[str] = [
     "cdn.discordapp.com",
 ]
 
-WELCOME_GIF: str = "welcome.png"
-DOTA_JOIN_GIF: str = "dota_join.gif"
-DOTA_LEAVE_GIF: str = "dota_leave.gif"
+WELCOME_GIF: str = "src/assets/gif/welcome.png"
+DOTA_JOIN_GIF: str = "src/assets/gif/dota_join.gif"
+DOTA_LEAVE_GIF: str = "src/assets/gif/dota_leave.gif"
 GAME_NAME: str = "Dota 2"
 VOICE_CHANNEL_NAME: str = "комната-{user}"
 
